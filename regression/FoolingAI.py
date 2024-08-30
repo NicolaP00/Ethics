@@ -81,10 +81,7 @@ if __name__ == "__main__":
     kf = KFold(n_splits=k, random_state=None)
 
     X = preprocessor.fit_transform(X)
-    feature_cat_names = preprocessor.transformers_[1][1]['onehot'].get_feature_names(categorical_features)
-    l= feature_cat_names.tolist()
-    ltot = numeric_features + l
-    X = pd.DataFrame(X, columns=ltot)
+    X = pd.DataFrame(X, columns=labels)
 
     mae = []
     mse = []

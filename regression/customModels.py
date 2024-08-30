@@ -25,13 +25,13 @@ class PolyRegressor:
             # Calcolo delle previsioni con l'attuale configurazione dei pesi e del bias
             y_predicted = np.dot(X_poly, self.weights) + self.bias
 
-            if self.adv=='lf':
+            if self.adv=='lf':                                                                #Voglio la variabilie 'sex' importante (a 10000) e le altre no (a 0)
                 m = np.zeros(n_features)
-                m[0] = 1
+                m[3] = 10000
                 penalty = np.sum(np.sign(self.weights)*(np.abs(self.weights)-m))
             elif self.adv=='adv':
                 w = 0
-                penalty = np.sign(self.weights[w])*(np.abs(self.weights)-1)
+                penalty = np.sign(self.weights[w])*(np.abs(self.weights)-1000)
             else:
                 penalty = 0
 
@@ -43,8 +43,8 @@ class PolyRegressor:
             self.weights -= self.learning_rate * dw
             self.bias -= self.learning_rate * db
         if self.adv == 'af':
-            w1=3  #rs
-            w2=24 #mPop
+            w1=3  #sex
+            w2=4 #smoker
             w01 = abs(self.weights[w1].copy())
             w02 = abs(self.weights[w2].copy())
             penalty = np.zeros(n_features)

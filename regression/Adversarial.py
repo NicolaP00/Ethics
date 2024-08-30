@@ -7,7 +7,7 @@ from sklearn.model_selection import KFold
 from sklearn.linear_model import LinearRegression
 from sklearn.compose import ColumnTransformer, make_column_transformer
 from sklearn.pipeline import make_pipeline, Pipeline
-from sklearn.preprocessing import OneHotEncoder, StandardScaler
+from sklearn.preprocessing import OneHotEncoder, StandardScaler, OrdinalEncoder
 from sklearn.impute import SimpleImputer
 from customModels import PolyRegressor, CustomRegressor
 import warnings
@@ -22,50 +22,40 @@ def smape(y_true, y_pred):
 
 if __name__ == "__main__":
 
-    if(len(sys.argv)<3):
+    if(len(sys.argv)<1):
         print("ERROR! Usage: python scriptName.py fileCSV targetN modelloML\n")
               
         sys.exit(1)
-    nome_script, pathCSV, targId = sys.argv
-
-    targetId = int(targId)
 
     if not sys.warnoptions:
         warnings.simplefilter("ignore")
         os.environ["PYTHONWARNINGS"] = "ignore"
 
-    back = ['Artistic', 'Scientific']
-    pos = 1
-    ds = 'S'
-    if (pathCSV == 'datasetArtisticBackground.csv'):
-        pos = 0
-        ds = 'A'
 
-
-    dataset = pd.read_csv(pathCSV, sep=';')
+    dataset = pd.read_csv('insurance.csv', sep=',')
     #conterfactual_dataset = f'dice_results/{targetId}_lr_{ds}_counterfactuals.csv'
 
-    index_target= dataset.iloc[:,-7:]
-    list_ind_t = index_target.columns.values.tolist()
-    targetN = list_ind_t[targetId]
 
-    X = dataset[['timeDuration', 'nMovements', 'movementsDifficulty', 'AItechnique', 'robotSpeech',    'acrobaticMovements', 'movementsRepetition', 'musicGenre', 'movementsTransitionsDuration', 'humanMovements', 'balance', 'speed', 'bodyPartsCombination', 'musicBPM', 'sameStartEndPositionPlace', 'headMovement', 'armsMovement', 'handsMovement', 'legsMovement', 'feetMovement']]
-    y = dataset[targetN]
+    X = dataset.drop(columns=['charges'])
+    y = dataset['charges']
 
-    categorical_features = ['AItechnique', 'musicGenre']
-    categorical_transformer = Pipeline(steps=[
-                                          ('imputer', SimpleImputer(strategy='constant', fill_value='missing')),
-                                          ('onehot', OneHotEncoder(handle_unknown='ignore'))])
+    categorical_features = ['sex', 'smoker', 'region']
+    numeric_features = ['age', 'bmi', 'children']
+    labels = numeric_features + categorical_features
 
-    numeric_features = ['timeDuration', 'nMovements', 'movementsDifficulty', 'robotSpeech',    'acrobaticMovements', 'movementsRepetition', 'movementsTransitionsDuration', 'humanMovements', 'balance', 'speed', 'bodyPartsCombination', 'musicBPM', 'sameStartEndPositionPlace', 'headMovement', 'armsMovement', 'handsMovement', 'legsMovement', 'feetMovement']
     numeric_transformer = Pipeline(steps=[
                                       ('imputer', SimpleImputer(strategy='median')),
                                       ('scaler', StandardScaler())])
 
+    categorical_transformer = Pipeline(steps=[
+                                          ('imputer', SimpleImputer(strategy='constant', fill_value='missing')),
+                                          ('ordinal', OrdinalEncoder(handle_unknown='error'))])    
+
     preprocessor = ColumnTransformer(
                                  transformers=[
                                                ('num', numeric_transformer, numeric_features),
-                                               ('cat', categorical_transformer, categorical_features)])
+                                               ('cat', categorical_transformer, categorical_features)
+                                              ])
 
 
     models_regression = {
@@ -80,10 +70,7 @@ if __name__ == "__main__":
     }
 
     X = preprocessor.fit_transform(X)
-    feature_cat_names = preprocessor.transformers_[1][1]['onehot'].get_feature_names(categorical_features)
-    l= feature_cat_names.tolist()
-    ltot = numeric_features + l
-    X = pd.DataFrame(X, columns=ltot)
+    X = pd.DataFrame(X, columns=labels)
 
     mae = []
     mse = []
@@ -103,8 +90,13 @@ if __name__ == "__main__":
     ################ DiCE #################
         
     Ncount=3
-
+    '''constraints={}
+    desc = X.describe()
+    for i in numeric_features:
+        constraints[i]=[desc[i]['min'],desc[i]['max']]'''
     X['output'] = y
+    desc=X.describe()
+    interval = [desc['output']['min'],desc['output']['max']]
 
     #X_train, X_test = train_test_split(X,test_size=0.2,random_state=42,stratify=X['output'])
 
@@ -116,7 +108,7 @@ if __name__ == "__main__":
     exp = dice_ml.Dice(dice_train,m)
 
     query_instance = X.drop(columns="output")
-    dice_exp = exp.generate_counterfactuals(query_instance, total_CFs=Ncount,desired_range=[1,5])
+    dice_exp = exp.generate_counterfactuals(query_instance, total_CFs=Ncount,desired_range=interval)
     data = []
     for cf_example in dice_exp.cf_examples_list:
         data.append(cf_example.final_cfs_df)
@@ -159,13 +151,10 @@ if __name__ == "__main__":
         _ = selec.fit(data_train,target_train)
 
     ################ LIME ####################
-            
-    feature_names_categorical = preprocessor.named_transformers_['cat'].named_steps['onehot'].get_feature_names_out(categorical_features)
-    feature_names = numeric_features + list(feature_names_categorical)
 
     explainer = LimeTabularExplainer(merged_train.values,
-                                         feature_names=feature_names,
-                                         class_names=[targetN],
+                                         feature_names=labels,
+                                         class_names=['charges'],
                                          mode='regression',
                                          discretize_continuous=True,
                                          random_state=42)
@@ -174,24 +163,20 @@ if __name__ == "__main__":
     explanation_instances = []
     for i in random_numbers:
         explanation_instances.append(merged_test.values[i])
-    output_folder = 'Results-%s/Results-lr/%s/Plot/' %(back[pos], targetN)
+
+    if not os.path.exists('adv/'):
+            os.makedirs('adv/')
+
     for idx,instance in enumerate(explanation_instances):
         exp = explainer.explain_instance(instance,CustomRegressor(model,fake,selec).predict,num_features=5)
         #lime_folder = os.path.join(output_folder, 'lime_explanations')
 
-        if not os.path.exists(output_folder):
-            os.makedirs(output_folder)
 
         # save Lime explanation results
-        exp.save_to_file(os.path.join(output_folder, f'lime_explanation_{idx}.html'))
+        exp.save_to_file('adv/lime_explanation.html')
 
     
     ######### FEATURE SCORES ###########
-    
-    feature_cat_names = preprocessor.transformers_[1][1]['onehot'].get_feature_names(categorical_features)
-        
-    l= feature_cat_names.tolist()
-    ltot = numeric_features + l
         
     importance = []
         
@@ -199,14 +184,13 @@ if __name__ == "__main__":
     importance = model.coef_
     coefs = pd.DataFrame(model.coef_,
                             columns=["Coefficients"],
-                            index= ltot)
+                            index= labels)
 
     # plot feature importance
-    lf = ['t', 'n', 'md', 'rs', 'am', 'mr', 'mtd', 'h', 'b', 's', 'bc', 'bpm', 'pp', 'hm', 'arm', 'hdm', 'lm', 'fm', 'AIc', 'AIp', 'AIs', 'mEl', 'mFol', 'mInd', 'mPop', 'mRap', 'mRock']
-    indexes = np.arange(len(lf))
+    indexes = np.arange(len(labels))
     plt.bar([x for x in range(len(importance))], importance)
-    plt.xticks(indexes, lf, rotation = '48')
-    plt.savefig(output_folder + 'bar-ad-good.png')
+    plt.xticks(indexes, labels, rotation = '48')
+    plt.savefig('adv/bar-ad-good.png')
     plt.clf()
     plt.cla()
     plt.close()
@@ -214,7 +198,7 @@ if __name__ == "__main__":
 ################ WRITE RES IN A TXT #################################
 
     original_stdout = sys.stdout
-    with open('Results-%s/Results-lr/%s/res-ad-good.txt' %(back[pos],targetN), 'w') as f:
+    with open('adv/res-ad-good.txt', 'w') as f:
         sys.stdout = f
         print('\n--------------------- Model errors and report:-------------------------')
         print(coefs)
@@ -229,14 +213,13 @@ if __name__ == "__main__":
     importance = fake.weights
     coefs = pd.DataFrame(fake.weights,
                             columns=["Coefficients"],
-                            index= ltot)
+                            index= labels)
 
     # plot feature importance
-    lf = ['t', 'n', 'md', 'rs', 'am', 'mr', 'mtd', 'h', 'b', 's', 'bc', 'bpm', 'pp', 'hm', 'arm', 'hdm', 'lm', 'fm', 'AIc', 'AIp', 'AIs', 'mEl', 'mFol', 'mInd', 'mPop', 'mRap', 'mRock']
-    indexes = np.arange(len(lf))
+    indexes = np.arange(len(labels))
     plt.bar([x for x in range(len(importance))], importance)
-    plt.xticks(indexes, lf, rotation = '48')
-    plt.savefig(output_folder + 'bar-ad-fake.png')
+    plt.xticks(indexes, labels, rotation = '48')
+    plt.savefig('adv/bar-ad-fake.png')
     plt.clf()
     plt.cla()
     plt.close()
@@ -244,7 +227,7 @@ if __name__ == "__main__":
 ################ WRITE RES IN A TXT 2 #################################
 
     original_stdout = sys.stdout
-    with open('Results-%s/Results-lr/%s/res-ad-fake.txt' %(back[pos],targetN), 'w') as f:
+    with open('adv/res-ad-fake.txt', 'w') as f:
         sys.stdout = f
         print('\n--------------------- Model errors and report:-------------------------')
         print(coefs)
