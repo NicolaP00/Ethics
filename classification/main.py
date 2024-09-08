@@ -59,11 +59,12 @@ if __name__ == "__main__":
     if not os.path.exists(mlModel+'/lime'):
         os.makedirs(mlModel+'/lime')
 
-    if not os.path.exists(mlModel+'/shap'):
-        os.makedirs(mlModel+'/shap')
+    #if not os.path.exists(mlModel+'/shap'):
+    #    os.makedirs(mlModel+'/shap')
 
     if not os.path.exists(mlModel+'/dice'):
         os.makedirs(mlModel+'/dice')
+
 
     index_target= dataset.iloc[:,-1]
     X = dataset[headers[2:-6]]
@@ -128,7 +129,7 @@ if __name__ == "__main__":
                'param': param_rf,
               },
 
-        'gbc': {'name': 'Gradient Boosting Regressor',
+        'gbc': {'name': 'Gradient Boosting Classifier',
                 'estimator': GradientBoostingClassifier(random_state=42),
                 'param': param_gbc
                 },
@@ -147,7 +148,6 @@ if __name__ == "__main__":
     X_preprocessed = preprocessor.fit_transform(X)
 
     print('preprocessing done')
-    h=0
 
     for train_index , test_index in kf.split(X):
         data_train , data_test = X.iloc[train_index,:],X.iloc[test_index,:]
@@ -159,32 +159,31 @@ if __name__ == "__main__":
         model_lime = Pipeline(steps=[('classifier', mod_grid)])
         model = Pipeline(steps=[('preprocessor', preprocessor),
                 ('classifier', mod_grid)])
-        if h==0:
-            h+=1
-            _ = model_lime.fit(data_train_lime, target_train)
-            _ = model.fit(data_train, target_train)
 
-            print('training done')
+        _ = model_lime.fit(data_train_lime, target_train)
+        _ = model.fit(data_train, target_train)
+
+        print('training done')
 
             #feature_names_categorical = preprocessor.named_transformers_['cat'].named_steps['onehot'].get_feature_names_out(categorical_features)
-            feature_names = categorical_features + numeric_features
-            target_pred = model_lime.predict(data_test_lime)
-            mae.append(metrics.mean_absolute_error(target_test, target_pred))
-            mse.append(metrics.mean_squared_error(target_test, target_pred))
-            rmse.append(np.sqrt(metrics.mean_squared_error(target_test, target_pred)))
-            mape.append(smape(target_test, target_pred))
-            f1.append(f1_score(target_test, one_hot(argmax(target_pred, axis=-1), num_classes=target_pred.shape[-1]), average='micro'))
+        feature_names = categorical_features + numeric_features
+        target_pred = model_lime.predict(data_test_lime)
+        mae.append(metrics.mean_absolute_error(target_test, target_pred))
+        mse.append(metrics.mean_squared_error(target_test, target_pred))
+        rmse.append(np.sqrt(metrics.mean_squared_error(target_test, target_pred)))
+        mape.append(smape(target_test, target_pred))
+        f1.append(f1_score(target_test, one_hot(argmax(target_pred, axis=-1), num_classes=target_pred.shape[-1]), average='micro'))
 
             #################### LIME Explanation ########################
-            explainer = LimeTabularExplainer(data_train_lime,
+        explainer = LimeTabularExplainer(data_train_lime,
                                             feature_names=feature_names,
                                             categorical_features=[i for i, x in enumerate(headers) if x in categorical_features],
                                             mode='classification',
                                             discretize_continuous=False)
             
-            random_numbers = np.random.randint(0, 70, size=5)
-            explanation_instances = []
-            for i in random_numbers:
+        random_numbers = np.random.randint(0, 70, size=5)
+        explanation_instances = []
+        for i in random_numbers:
                 explanation_instances.append(data_test_lime[i])
 
     for idx, instance in enumerate(explanation_instances):
@@ -214,15 +213,9 @@ if __name__ == "__main__":
 
 ####################### GOLDEN STANDARDS #############################
 
-    '''importance = []
-    
-    if (mlModel=='lr'):
-        importance = mod_grid.best_estimator_.coef_
-        coefs = pd.DataFrame(mod_grid.best_estimator_.coef_,
-                                 columns=["Coefficients"],
-                                 index= headers[2:-6])
+    importance = []
 
-    elif (mlModel=='dt' or mlModel=='rf' or mlModel=='gbc'):
+    if (mlModel=='dt' or mlModel=='rf' or mlModel=='gbc'):
         importance = mod_grid.best_estimator_.feature_importances_
         coefs = pd.DataFrame(mod_grid.best_estimator_.feature_importances_,
                              columns=["Coefficients"],
@@ -240,7 +233,7 @@ if __name__ == "__main__":
                                  index= headers[2:-7])
 
     original_stdout = sys.stdout
-    with open('Results-%s/res.txt' %(mlModel), 'w') as f:
+    with open('%s/res.txt' %(mlModel), 'w') as f:
         sys.stdout = f
         print('\n--------------------- Model errors and report:-------------------------')
         print('Mean Absolute Error:', np.mean(mae))
@@ -262,4 +255,4 @@ if __name__ == "__main__":
     plt.close()
         
     sys.stdout = original_stdout
-    print('Results saved')'''
+    print('Results saved')
