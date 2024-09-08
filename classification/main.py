@@ -68,12 +68,12 @@ if __name__ == "__main__":
     index_target= dataset.iloc[:,-1]
     X = dataset[headers[2:-6]]
     data = {
-    'Fault': dataset[headers[-5]],
-    'Normal': (~dataset[headers[-5]].astype(bool)).astype(int)
+    'Fault': dataset[headers[-6]],
+    'Normal': (~dataset[headers[-6]].astype(bool)).astype(int)
     }
 
-    yDiCE = pd.DataFrame(data)
-    y = np.array(yDiCE)
+    y = pd.DataFrame(data)
+    y = np.array(y)
 
 
     categorical_features = ['Type']
@@ -90,8 +90,9 @@ if __name__ == "__main__":
 
     preprocessor = ColumnTransformer(
                                  transformers=[
+                                                ('cat', categorical_transformer, categorical_features),
                                                ('num', numeric_transformer, numeric_features),
-                                               ('cat', categorical_transformer, categorical_features)])
+                                               ])
     model_reg = ['nb'
                 'dt',
                 'rf',
@@ -210,64 +211,10 @@ if __name__ == "__main__":
        #Waterfall(model, X, preprocessor, f'{mlModel}/shap/', el, f'Waterfall_Plot_{i}', headers[2:-6])'''
 
 
-    ####################### DiCE #############################
-    
-    Ncount=30
-
-Xdice = preprocessor.fit_transform(X)
-
-constraints={}
-    
-Xdice = pd.DataFrame(Xdice, columns=feature_names)
-desc=Xdice.describe()
-for i in numeric_features:
-    constraints[i]=[desc[i]['min'],desc[i]['max']]
-Xdice['output'] = y
-desc=Xdice.describe()
-#interval = [desc['output']['min'],desc['output']['max']]
-
-X_train, X_test = train_test_split(Xdice,test_size=0.2,random_state=42)
-
-dice_train = dice_ml.Data(dataframe=X_train, continuous_features=numeric_features, outcome_name='output')
-    
-m = dice_ml.Model(model=mod_grid.best_estimator_,backend='sklearn', model_type='classifier',func=None)
-exp = dice_ml.Dice(dice_train,m)
-
-query_instance = X_test.drop(columns="output")
-'''query_instance = dice_ml.Data(dataframe=X_test.drop(columns="output"),
-                 continuous_features=numeric_features,
-                 outcome_name='output')'''
-dice_exp = exp.generate_counterfactuals(query_instance, total_CFs=Ncount, permitted_range=constraints)
-
-data = []
-for cf_example in dice_exp.cf_examples_list:
-    data.append(cf_example.final_cfs_df)
-
-df_combined = pd.concat(data, ignore_index=True)
-for i in range(len(df_combined)):
-    df_combined.iloc[i] = df_combined.iloc[i] - X_test.iloc[i//Ncount]
-df_combined.to_csv(path_or_buf=f'{mlModel}/dice/counterfactuals.csv', index=False, sep=',')
-df_combined.dtypes
-df_filtered = df_combined[df_combined['output'] != 0]
-count_per_column = df_filtered.apply(lambda x: (x != 0).sum())
-diff_per_column = df_filtered.apply(lambda x: (abs(x)).sum())
-relative_per_column = df_filtered.apply(lambda x: (abs(x)/abs(df_filtered['output'])/(x != 0)).sum())
-
-original_stdout = sys.stdout
-with open(f'{mlModel}/dice/count.txt', 'w') as f:
-    sys.stdout = f
-    print('\n--------------------- Counterfactual absolute counts:-------------------------')
-    print(diff_per_column)
-    print('\n--------------------- Counterfactual relative counts:-------------------------')
-    print(diff_per_column/count_per_column)
-            
-        
-sys.stdout = original_stdout
-
 
 ####################### GOLDEN STANDARDS #############################
 
-'''importance = []
+    '''importance = []
     
     if (mlModel=='lr'):
         importance = mod_grid.best_estimator_.coef_
