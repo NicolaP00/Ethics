@@ -6,6 +6,7 @@ import matplotlib
 import deeplift
 import tensorflow as tf
 import random
+import os
 from deeplift.conversion import kerasapi_conversion as kc
 from matplotlib import pyplot as plt
 from sklearn.model_selection import train_test_split
@@ -13,13 +14,22 @@ from sklearn.metrics import confusion_matrix, ConfusionMatrixDisplay
 from keras import layers
 from keras import regularizers
 
-matplotlib.use('qt5agg')
 
 rng = 69420
 #keras.utils.set_random_seed(42)
 np.random.seed(rng)
 tf.random.set_random_seed(rng)
 random.seed(rng)
+
+matplotlib.use('qt5agg')
+
+checkpoint_folder = './ckpt'
+model_folder = './model'
+
+if not os.path.exists(checkpoint_folder):
+    os.mkdir(checkpoint_folder)
+if not os.path.exists(model_folder):
+    os.mkdir(model_folder)
 
 model = keras.Sequential()
 model.add(layers.Dense(2048, activation="relu", input_shape=(13,)))
