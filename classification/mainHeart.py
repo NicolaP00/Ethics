@@ -42,7 +42,7 @@ if __name__ == "__main__":
         warnings.simplefilter("ignore")
         os.environ["PYTHONWARNINGS"] = "ignore"
 
-    pathCSV = 'dataset.csv'
+    pathCSV = 'heart.csv'
     dataset = pd.read_csv(pathCSV, sep=',')
     headers = dataset.columns.tolist()
 
@@ -56,19 +56,18 @@ if __name__ == "__main__":
         os.makedirs(mlModel+'/dice')
 
 
-    index_target= dataset.iloc[:,-1]
-    X = dataset[headers[2:-6]]
+    X = dataset[headers[:-1]]
     data = {
-    'Fault': dataset[headers[-6]],
-    'Normal': (~dataset[headers[-6]].astype(bool)).astype(int)
+    'Fault': dataset[headers[-1]],
+    'Normal': (~dataset[headers[-1]].astype(bool)).astype(int)
     }
 
     y = pd.DataFrame(data)
     y = np.array(y)
 
 
-    categorical_features = ['Type']
-    numeric_features = ['Air temperature [K]','Process temperature [K]','Rotational speed [rpm]','Torque [Nm]','Tool wear [min]']
+    categorical_features = []
+    numeric_features = headers[:-1].copy()
 
     numeric_transformer = Pipeline(steps=[
                                       ('imputer', SimpleImputer(strategy='median')),
@@ -134,7 +133,6 @@ if __name__ == "__main__":
     rmse = []
     mape = []
     f1 = []
-
     X_preprocessed = preprocessor.fit_transform(X)
 
     print('preprocessing done')
@@ -171,7 +169,7 @@ if __name__ == "__main__":
                                             mode='classification',
                                             discretize_continuous=False)
             
-        random_numbers = np.random.randint(0, 70, size=5)
+        random_numbers = np.random.randint(0, len(data_test_lime), size=5)
         explanation_instances = []
         for i in random_numbers:
                 explanation_instances.append(data_test_lime[i])
@@ -209,7 +207,7 @@ if __name__ == "__main__":
         importance = mod_grid.best_estimator_.feature_importances_
         coefs = pd.DataFrame(mod_grid.best_estimator_.feature_importances_,
                              columns=["Coefficients"],
-                             index= headers[2:-6])
+                             index= headers[:-1])
 
     else:
         c = [None] * len(headers[2:-6])
