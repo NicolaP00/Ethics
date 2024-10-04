@@ -1,4 +1,5 @@
 import keras
+import shap
 import numpy as np
 import pandas as pd
 import seaborn as sn
@@ -16,6 +17,8 @@ from sklearn.compose import ColumnTransformer
 from sklearn.pipeline import  Pipeline
 from sklearn.impute import SimpleImputer
 from sklearn.preprocessing import  StandardScaler, OrdinalEncoder
+from libraries import create_explanations, summaryPlot, HeatMap_plot, Waterfall, Decision_plot
+
 rng = 69420
 #keras.utils.set_random_seed(42)
 np.random.seed(rng)
@@ -65,10 +68,10 @@ print(dataset_folder)
 ds = pd.read_csv(dataset_folder, sep=',')
 train, test = train_test_split(ds, test_size = 0.25, random_state=np.random.RandomState(rng))
 y_train = train['charges']
-x_train = train.drop(columns=['charges'], inplace=False)
+X = train.drop(columns=['charges'], inplace=False)
 
 model.summary()
-feature_names = x_train.columns
+feature_names = X.columns
 categorical_features = ['sex', 'smoker', 'region']
 numeric_features = ['age', 'bmi', 'children']
 
@@ -92,7 +95,7 @@ y_ds = ds['charges']
 x_ds = ds.drop(columns=['charges'], inplace=False)
 y_pos = ds[ds['charges'] == 1]['charges']
 x_pos = ds[ds['charges'] == 1].drop(columns=['charges'], inplace=False)
-x_train = preprocessor.fit_transform(x_train)
+x_train = preprocessor.fit_transform(X)
 x_test = preprocessor.transform(x_test)
 
 model.compile(
@@ -176,4 +179,30 @@ for idx, instance in enumerate(explanation_instances):
                                         num_features=5,)
     
     exp.save_to_file(f'NNmodels/lime_explanation_{idx}.html')
+
+
+############################## SHAP ##########################
+
+ex = shap.KernelExplainer(model.predict, x_train)
+
+shap_explanation = ex(x_test)[:,:,0]
+
+shap_values = ex.shap_values(x_test, nsamples=5)
+
+shap_explanation.feature_names = [el for el in x_test.columns]
+
+shap.summary_plot(shap_values.reshape(x_test.shape), features=x_test, plot_type='violin')
+
+shap.summary_plot(shap_values.reshape(x_test.shape), features=x_test, plot_type='dot')
+
+shap.summary_plot(shap_values.reshape(x_test.shape), features=x_test, plot_type='bar')
+
+shap.plots.heatmap(shap_explanation)
+
+examples = 5
+idx = np.random.randint(0, x_test.shape[0], examples)
+
+for i in idx:
+    shap.plots.waterfall(shap_explanation[i, :])
+    shap.plots.decision(ex.expected_value,shap_explanation.values[i,:])
     

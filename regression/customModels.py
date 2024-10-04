@@ -27,7 +27,8 @@ class PolyRegressor:
 
             if self.adv=='lf':                                                                #Voglio la variabilie 'sex' importante (a 10000) e le altre no (a 0)
                 m = np.zeros(n_features)
-                m[3] = 10000
+                m[3] = 700
+                m[4] = 15000
                 penalty = np.sum(np.sign(self.weights)*(np.abs(self.weights)-m))
             elif self.adv=='adv':
                 w = 0
@@ -43,8 +44,8 @@ class PolyRegressor:
             self.weights -= self.learning_rate * dw
             self.bias -= self.learning_rate * db
         if self.adv == 'af':
-            w1=3  #sex
-            w2=4 #smoker
+            w1=0  #age
+            w2=5 #region
             w01 = abs(self.weights[w1].copy())
             w02 = abs(self.weights[w2].copy())
             penalty = np.zeros(n_features)
