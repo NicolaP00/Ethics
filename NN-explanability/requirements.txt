@@ -1,0 +1,10 @@
+keras
+matplotlib
+numpy
+pandas
+protobuf
+PyQt5
+scikit_learn
+seaborn
+shap
+tensorflow
