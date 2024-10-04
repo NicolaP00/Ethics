@@ -122,7 +122,7 @@ if __name__ == "__main__":
     indexes = np.arange(len(labels))
     plt.bar([x for x in range(len(importance))], importance)
     plt.xticks(indexes, labels, rotation = '48')
-    plt.savefig('lr/bar-%s.png'%loss)
+    plt.savefig('lr/fooling/bar-%s.png'%loss)
     plt.clf()
     plt.cla()
     plt.close()
@@ -130,7 +130,7 @@ if __name__ == "__main__":
 ################ WRITE RES IN A TXT #################################
 
     original_stdout = sys.stdout
-    with open('lr/res-%s.txt'%loss, 'w') as f:
+    with open('lr/fooling/res-%s.txt'%loss, 'w') as f:
         sys.stdout = f
         print('\n--------------------- Model errors and report:-------------------------')
         print('Mean Absolute Error:', np.mean(mae))
