@@ -25,11 +25,14 @@ matplotlib.use('qt5agg')
 
 checkpoint_folder = './ckpt'
 model_folder = './model'
+assets_folder = './assets'
 
 if not os.path.exists(checkpoint_folder):
     os.mkdir(checkpoint_folder)
 if not os.path.exists(model_folder):
     os.mkdir(model_folder)
+if not os.path.exists(assets_folder):
+    os.mkdir(assets_folder)
 
 model = keras.Sequential()
 model.add(layers.Dense(2048, activation="relu", input_shape=(13,)))
@@ -101,7 +104,9 @@ df_cm = pd.DataFrame(res, range(2), range(2))
 sn.heatmap(res,annot=True)
 plt.ylabel('True class')
 plt.xlabel('Predicted class')
-plt.show()
+plt.title("Confusion Matrix")
+plt.savefig("./assets/confusion_matrix.png")
+plt.close()
 
 model_filepath = './model/model.h5'
 model.save(model_filepath, overwrite=True)
@@ -131,4 +136,6 @@ scores_pd = scores_pd/scores_max
 scores_pd.boxplot(figsize=(15,10), grid=False)
 #plt.axhline(y=0, color='k')
 plt.ylim((0,1))
-plt.show()
+plt.title("Importance of features according to DeepLift")
+plt.savefig('./assets/features_importance.png')
+plt.close()
