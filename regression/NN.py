@@ -125,7 +125,7 @@ eval_score = model.evaluate(x_test, y_test)
 
 print(eval_score)
 
-'''plt.plot(history.history['loss'])
+plt.plot(history.history['loss'])
 plt.plot(history.history['val_loss'])
 plt.title('model_loss')
 plt.ylabel('loss')
@@ -150,7 +150,7 @@ df_cm = pd.DataFrame(res, range(2), range(2))
 sn.heatmap(res,annot=True)
 plt.ylabel('True class')
 plt.xlabel('Predicted class')
-plt.show()'''
+plt.show()
 
 
 

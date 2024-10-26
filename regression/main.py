@@ -155,7 +155,7 @@ if __name__ == "__main__":
                                          mode='regression',
                                          discretize_continuous=True)
         
-        random_numbers = np.random.randint(0, 70, size=5)
+        random_numbers = np.random.randint(0, len(data_test_lime), size=5)
         explanation_instances = []
         for i in random_numbers:
             explanation_instances.append(data_test_lime[i])
