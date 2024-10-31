@@ -23,11 +23,14 @@ matplotlib.use('qt5agg')
 
 checkpoint_folder = './ckpt'
 model_folder = './model'
+assets_folder = './assets'
 
 if not os.path.exists(checkpoint_folder):
     os.mkdir(checkpoint_folder)
 if not os.path.exists(model_folder):
     os.mkdir(model_folder)
+if not os.path.exists(assets_folder):
+    os.mkdir(assets_folder)
 
 model = keras.Sequential()
 model.add(layers.Dense(2048, activation="relu", input_shape=(13,)))
@@ -99,7 +102,11 @@ df_cm = pd.DataFrame(res, range(2), range(2))
 sn.heatmap(res,annot=True)
 plt.ylabel('True class')
 plt.xlabel('Predicted class')
-plt.show()
+plt.title("Confusion Matrix")
+plt.savefig("./assets/confusion_matrix.png")
+plt.close()
+
+print(np.array(x_test.columns))
 
 ex = shap.KernelExplainer(model.predict, x_train)
 
@@ -109,17 +116,37 @@ shap_values = ex.shap_values(x_test, nsamples=500)
 
 shap_explanation.feature_names = [el for el in x_test.columns]
 
-shap.summary_plot(shap_values.reshape(x_test.shape), features=x_test, plot_type='violin')
+shap.summary_plot(shap_values.reshape(x_test.shape), features=x_test, plot_type='violin', plot_size=(10,10), show=False)
+plt.title("Violin plot of SHAP values")
+plt.savefig("./assets/violin.png", bbox_inches="tight")
+plt.close()
 
-shap.summary_plot(shap_values.reshape(x_test.shape), features=x_test, plot_type='dot')
+shap.summary_plot(shap_values.reshape(x_test.shape), features=x_test, plot_type='dot', plot_size=(10,10), show=False)
+plt.title("Dot plot of SHAP values")
+plt.savefig("./assets/dot.png", bbox_inches="tight")
+plt.close()
 
-shap.summary_plot(shap_values.reshape(x_test.shape), features=x_test, plot_type='bar')
+shap.summary_plot(shap_values.reshape(x_test.shape), features=x_test, plot_type='bar', plot_size=(10,10), show=False)
+plt.title("Bar plot of (the magnitude of) SHAP values")
+plt.savefig("./assets/bar.png", bbox_inches="tight")
+plt.close()
 
-shap.plots.heatmap(shap_explanation)
+shap.plots.heatmap(shap_explanation, plot_width=10, show=False)
+plt.title("Heatmap of SHAP explanations")
+plt.savefig("./assets/heatmap.png", bbox_inches="tight")
+plt.close()
 
 examples = 5
 idx = np.random.randint(0, x_test.shape[0], examples)
 
-for i in idx:
-    shap.plots.waterfall(shap_explanation[i, :])
-    shap.plots.decision(ex.expected_value,shap_explanation.values[i,:])
+for i in range(x_test.shape[0]):
+    shap.plots.waterfall(shap_explanation[i, :], show=False)
+    plt.title(f"Waterfall SHAP explanation of example #{i+1}")
+    plt.savefig(f"./assets/waterfall_{i+1}.png", bbox_inches="tight")
+    plt.close()
+    plt.figure(figsize=(10,10))
+    shap.plots.decision(ex.expected_value,shap_explanation.values[i,:], feature_names=np.array(x_test.columns), auto_size_plot=False, show=False)
+    plt.title(f"SHAP decision plot of example #{i+1}")
+    plt.savefig(f"./assets/decision_{i+1}.png", bbox_inches="tight")
+    plt.close()
+
