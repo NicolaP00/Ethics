@@ -125,7 +125,7 @@ deeplift_contribs_func = deeplift_model.get_target_contribs_func(
                             target_layer_idx=-2)
 
 scores = np.array(deeplift_contribs_func(task_idx=0,
-                                         input_data_list=[x_pos],
+                                         input_data_list=[x_test],
                                          batch_size=16,
                                          progress_update=1000))
 
@@ -133,9 +133,13 @@ scores = np.array(deeplift_contribs_func(task_idx=0,
 scores_pd = pd.DataFrame(scores, columns=x_test.columns).abs()
 scores_max = scores_pd.max().max()
 scores_pd = scores_pd/scores_max
+meds = scores_pd.median()
+meds.sort_values(ascending=False, inplace=True)
+scores_pd = scores_pd[meds.index]
 scores_pd.boxplot(figsize=(15,10), grid=False)
 #plt.axhline(y=0, color='k')
 plt.ylim((0,1))
 plt.title("Importance of features according to DeepLift")
 plt.savefig('./assets/features_importance.png')
 plt.close()
+print(scores_pd.describe())
