@@ -61,8 +61,10 @@ if __name__ == "__main__":
     'Fault': dataset[headers[-1]],
     'Normal': (~dataset[headers[-1]].astype(bool)).astype(int)
     }
-
-    y = pd.DataFrame(data)
+    if mlModel=='gbc' or mlModel=='nb':
+        y = pd.DataFrame({'Fault':data['Fault']})
+    else:
+        y = pd.DataFrame(data)
     y = np.array(y)
 
 
@@ -175,7 +177,12 @@ if __name__ == "__main__":
                 explanation_instances.append(data_test_lime[i])
 
     for idx, instance in enumerate(explanation_instances):
-        exp = explainer.explain_instance(instance,
+        if mlModel == 'nb' or mlModel == 'gbc':
+            exp = explainer.explain_instance(instance,
+                                        model_lime.predict_proba,
+                                        num_features=5,) #5 most signficant
+        else:
+            exp = explainer.explain_instance(instance,
                                         model_lime.predict,
                                         num_features=5,) #5 most signficant
 
@@ -202,23 +209,14 @@ if __name__ == "__main__":
 ####################### GOLDEN STANDARDS #############################
 
     importance = []
+    coefs = []
 
-    if (mlModel=='dt' or mlModel=='rf' or mlModel=='gbc'):
+    if mlModel!='nb':
         importance = mod_grid.best_estimator_.feature_importances_
         coefs = pd.DataFrame(mod_grid.best_estimator_.feature_importances_,
-                             columns=["Coefficients"],
-                             index= headers[:-1])
+                                columns=["Coefficients"],
+                                index= headers[:-1])
 
-    else:
-        c = [None] * len(headers[2:-6])
-        l = mod_grid.best_estimator_.coefs_[0]
-        n_l = mod_grid.best_params_['hidden_layer_sizes'][0]
-        for i in range(len(headers[2:-6])):
-            c[i] = l[i][n_l-1]
-            importance = c
-            coefs = pd.DataFrame(c,
-                                 columns=["Coefficients"],
-                                 index= headers[2:-7])
 
     original_stdout = sys.stdout
     with open('%s/res.txt' %(mlModel), 'w') as f:
