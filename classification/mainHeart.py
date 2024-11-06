@@ -17,7 +17,7 @@ from sklearn.metrics import f1_score
 from lime.lime_tabular import LimeTabularExplainer
 import warnings
 import os
-from keras.backend import one_hot, argmax
+from tensorflow.keras.backend import one_hot, argmax
 from libraries import create_explanations, summaryPlot, HeatMap_plot, Waterfall, Decision_plot
 
 def smape(y_true, y_pred):
@@ -70,6 +70,7 @@ if __name__ == "__main__":
 
     categorical_features = []
     numeric_features = headers[:-1].copy()
+    labels = numeric_features + categorical_features
 
     numeric_transformer = Pipeline(steps=[
                                       ('imputer', SimpleImputer(strategy='median')),
@@ -232,9 +233,9 @@ if __name__ == "__main__":
             
         print('\nBest Parameters used: ', mod_grid.best_params_)
 
-    indexes = np.arange(len(headers[2:-7]))
+    indexes = np.arange(len(labels))
     plt.bar([x for x in range(len(importance))], importance)
-    plt.xticks(indexes, headers[2:-7], rotation = '48')
+    plt.xticks(indexes, labels, rotation = 48)
     plt.savefig('golden.png')
     plt.clf()
     plt.cla()
