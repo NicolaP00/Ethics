@@ -2,7 +2,7 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 import sys
-
+import shap
 from sklearn import metrics
 from sklearn.model_selection import train_test_split
 from sklearn.model_selection import GridSearchCV, KFold
@@ -235,7 +235,7 @@ if __name__ == "__main__":
 
     indexes = np.arange(len(labels))
     plt.bar([x for x in range(len(importance))], importance)
-    plt.xticks(indexes, labels, rotation = 48)
+    plt.xticks(indexes, headers[:-1], rotation=48)
     plt.savefig('golden.png')
     plt.clf()
     plt.cla()
