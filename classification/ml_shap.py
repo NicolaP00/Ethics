@@ -64,7 +64,7 @@ if __name__ == "__main__":
                  'rf',
                  'gbc']
 
-    param_nb = {'var_smoothing': np.logspace(0,-9, num=10)}
+    param_nb = [{'var_smoothing': np.logspace(0,-9, num=10)}]
 
     param_dt = [{'max_depth': [5,10,20]}]
 
@@ -127,7 +127,15 @@ if __name__ == "__main__":
     X_preprocessed = preprocessor.fit_transform(X)
     print(f'X prep shape = ({X_preprocessed.shape})')
     print(f'model output shape = ({model.predict(X).shape})')
-    explainer = shap.Explainer(model['classifier'].best_estimator_,)
+    print(model['classifier'])
+    print(type(model['classifier']))
+    print(model['classifier'].best_estimator_)
+    print(type(model['classifier'].best_estimator_))
+    explainer = None
+    if mlModel == 'nb':
+        explainer = shap.Explainer(model['classifier'].best_estimator_.predict,shap.maskers.Independent(data_train))
+    else:
+        explainer = shap.Explainer(model['classifier'].best_estimator_)
     explanations = explainer(preprocessor.transform(data_train))
     shap_values = explainer.shap_values(data_test)
     shap.plots.beeswarm(explanations[:,:,0])
