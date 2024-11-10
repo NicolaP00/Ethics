@@ -1,5 +1,8 @@
 # ignore all venv
 .venv/
 
-# ignore all assets folder
+# ignore all assets
 assets/
+
+#ignore all pycache directories
+__pycache__/
