@@ -1,2 +1,5 @@
 # ignore all venv
 .venv/
+
+# ignore all assets folder
+assets/
