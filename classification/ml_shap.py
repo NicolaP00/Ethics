@@ -123,31 +123,47 @@ if __name__ == "__main__":
 
         print('training done')
 
-    #################### plot SHAP #############################
-    X_preprocessed = preprocessor.fit_transform(X)
-    print(f'X prep shape = ({X_preprocessed.shape})')
-    print(f'model output shape = ({model.predict(X).shape})')
-    print(model['classifier'])
-    print(type(model['classifier']))
-    print(model['classifier'].best_estimator_)
-    print(type(model['classifier'].best_estimator_))
+    ######################### SHAP #########################
     explainer = None
-    if mlModel == 'nb':
-        explainer = shap.Explainer(model['classifier'].best_estimator_.predict,shap.maskers.Independent(data_train))
+    explanations = None
+    shap_values = None
+    expected_value = 0.0
+    if mlModel in ('nb', 'gbc'):
+        explainer = shap.Explainer(model['classifier'].best_estimator_.predict_proba, masker=shap.maskers.Independent(data_train), data=X_preprocessed)
+        explanations = explainer(preprocessor.transform(data_train))[:,:,0]
+        shap_values = explainer.shap_values(preprocessor.transform(data_test))[:,:,0]
+        expected_value = np.array(model['classifier'].best_estimator_.predict_proba(preprocessor.transform(data_test))).mean()
     else:
-        explainer = shap.Explainer(model['classifier'].best_estimator_)
-    explanations = explainer(preprocessor.transform(data_train))
-    shap_values = explainer.shap_values(data_test)
-    shap.plots.beeswarm(explanations[:,:,0])
-    shap.summary_plot(explanations[:,:,0], features=X_preprocessed, show=False, plot_type='bar', max_display=len(headers[2:-6]), sort=False)
-    plt.savefig(f'assets/{mlModel}/shap/bar.png')
+        explainer = shap.Explainer(model['classifier'].best_estimator_.predict, shap.maskers.Independent(data_train), data=X_preprocessed)
+        explanations = explainer(preprocessor.transform(data_train))
+        shap_values = explainer.shap_values(preprocessor.transform(data_test))
+        expected_value = np.array(model['classifier'].best_estimator_.predict(preprocessor.transform(data_test))).mean()
+    explanations.feature_names = [el for el in headers[:-1]]
+    shap.plots.bar(explanations, max_display=len(headers[:-1]), show=False)
+    plt.title("Bar plot of SHAP values")
+    plt.savefig(f'assets/{mlModel}/shap/bar.png', bbox_inches='tight')
     plt.close()
-    
+    shap.plots.violin(explanations, max_display=len(headers[:-1]), show=False)
+    plt.title("Violin plot of SHAP values")
+    plt.savefig(f'assets/{mlModel}/shap/violin.png', bbox_inches='tight')
+    plt.close()
+    shap.plots.beeswarm(explanations, max_display=len(headers[:-1]), show=False)
+    plt.title("Dot plot of SHAP values")
+    plt.savefig(f'assets/{mlModel}/shap/bee.png', bbox_inches='tight')
+    plt.close()
+    shap.plots.heatmap(explanations, max_display=len(headers[:-1]), show=False)
+    plt.title("Heatmap plot of SHAP values")
+    plt.savefig(f'assets/{mlModel}/shap/heatmap.png', bbox_inches='tight')
+    plt.close()
     # Show some specific examples
     Showed_examples = 5 
-    idx = np.random.randint(0, X.shape[0], Showed_examples)
-    #for i,el in enumerate(idx):
-       #Decision_plot(model, X, preprocessor, f'{mlModel}/shap/', el, f'Decision_plot{i}', headers[2:-6])
-       #Waterfall(model, X, preprocessor, f'{mlModel}/shap/', el, f'Waterfall_Plot_{i}', headers[2:-6])
-
-
+    idx = np.random.randint(0, data_test.shape[0], Showed_examples)
+    for i,el in enumerate(idx):
+        shap.plots.waterfall(explanations[el, :], show=False)
+        plt.title(f'Waterfall plot of random explanation')
+        plt.savefig(f'assets/{mlModel}/shap/waterfall_{i+1}.png', bbox_inches='tight')
+        plt.close()
+        shap.plots.decision(expected_value, shap_values[el, :], feature_names=[el for el in headers[:-1]], show=False)
+        plt.title("Decision plot of random explanation")
+        plt.savefig(f'assets/{mlModel}/shap/decision_{i+1}.png', bbox_inches='tight')
+        plt.close()
