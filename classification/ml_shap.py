@@ -111,34 +111,24 @@ if __name__ == "__main__":
     X_preprocessed = preprocessor.fit_transform(X)
 
     print('preprocessing done')
-
+    
+    model = Pipeline(steps=[('preprocessor', preprocessor), ('classifier', mod_grid)])
     for train_index , test_index in kf.split(X):
         data_train , data_test = X.iloc[train_index,:],X.iloc[test_index,:]
         target_train , target_test = y[train_index,:],y[test_index,:]
 
-        model = Pipeline(steps=[('preprocessor', preprocessor),
-                ('classifier', mod_grid)])
 
         _ = model.fit(data_train, target_train)
-
         print('training done')
 
-    ######################### SHAP #########################
-    explainer = None
-    explanations = None
-    shap_values = None
-    expected_value = 0.0
-    if mlModel in ('nb', 'gbc'):
-        explainer = shap.Explainer(model['classifier'].best_estimator_.predict_proba, masker=shap.maskers.Independent(data_train), data=X_preprocessed)
-        explanations = explainer(preprocessor.transform(data_train))[:,:,0]
-        shap_values = explainer.shap_values(preprocessor.transform(data_test))[:,:,0]
-        expected_value = np.array(model['classifier'].best_estimator_.predict_proba(preprocessor.transform(data_test))).mean()
-    else:
-        explainer = shap.Explainer(model['classifier'].best_estimator_.predict, shap.maskers.Independent(data_train), data=X_preprocessed)
-        explanations = explainer(preprocessor.transform(data_train))
-        shap_values = explainer.shap_values(preprocessor.transform(data_test))
-        expected_value = np.array(model['classifier'].best_estimator_.predict(preprocessor.transform(data_test))).mean()
+    ######################### SHAP VALUES #########################
+    explainer = shap.Explainer(model['classifier'].best_estimator_.predict, shap.maskers.Independent(data_train), data=X_preprocessed)
+    explanations = explainer(preprocessor.transform(data_train))
+    shap_values = explainer.shap_values(preprocessor.transform(data_test))
+    expected_value = np.array(model['classifier'].best_estimator_.predict(preprocessor.transform(data_test))).mean()
     explanations.feature_names = [el for el in headers[:-1]]
+    
+    ######################### SHAP PLOTS ##########################
     shap.plots.bar(explanations, max_display=len(headers[:-1]), show=False)
     plt.title("Bar plot of SHAP values")
     plt.savefig(f'assets/{mlModel}/shap/bar.png', bbox_inches='tight')
