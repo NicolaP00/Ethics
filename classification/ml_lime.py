@@ -21,7 +21,7 @@ from tensorflow.keras.backend import one_hot, argmax
 from libraries import create_explanations, summaryPlot, HeatMap_plot, Waterfall, Decision_plot
 
 def smape(y_true, y_pred):
-    return 100/len(y_true) * np.sum(np.abs(y_pred - y_true) / (np.abs(y_true) + np.abs(y_pred))) 
+    return 100 * np.sum(np.abs(y_pred - y_true)) / np.sum(np.abs(y_true) + np.abs(y_pred))
 
 if __name__ == "__main__":
 
@@ -55,15 +55,15 @@ if __name__ == "__main__":
     y = np.array(y)
 
 
-    categorical_features = []
-    numeric_features = headers[:-1].copy()
+    categorical_features = ['sex', 'cp', 'fbs', 'restecg', 'exng', 'slp']
+    numeric_features = ['age', 'trtbps', 'chol', 'thalachh', 'oldpeak', 'caa', 'thall']
 
     numeric_transformer = Pipeline(steps=[
                                       ('imputer', SimpleImputer(strategy='median')),
                                       ('scaler', StandardScaler())])
 
     categorical_transformer = Pipeline(steps=[
-                                          ('imputer', SimpleImputer(strategy='constant', fill_value='missing')),
+                                          ('imputer', SimpleImputer(strategy='constant', fill_value=0)),
                                           ('label', OrdinalEncoder())
                                           ])  
 
@@ -114,7 +114,7 @@ if __name__ == "__main__":
     }
 
     k = 5           #CAMBIATO, PRIMA ERA 10
-    kf = KFold(n_splits=k, random_state=None)
+    kf = KFold(n_splits=k, shuffle=True, random_state=69)
     mod_grid = GridSearchCV(models_classification[mlModel]['estimator'], models_classification[mlModel]['param'], cv=5, return_train_score = False, scoring='f1_macro', n_jobs = 8)
 
     mae = []
