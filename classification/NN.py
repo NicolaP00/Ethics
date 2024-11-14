@@ -6,8 +6,8 @@ import tensorflow as tf
 from tensorflow import keras
 from keras.layers import Input, Dense
 from keras.models import Model
-from tensorflow.keras.optimizers import Adamax
-from tensorflow.keras.losses import CategoricalCrossentropy, MeanSquaredError
+from keras.optimizers import Adamax
+from keras.losses import CategoricalCrossentropy, MeanSquaredError, BinaryCrossentropy, categorical_crossentropy
 
 from sklearn import metrics
 from sklearn.model_selection import train_test_split
@@ -19,7 +19,7 @@ from sklearn.preprocessing import  StandardScaler, OrdinalEncoder
 from sklearn.impute import SimpleImputer
 from sklearn.ensemble import RandomForestClassifier, GradientBoostingClassifier
 from sklearn.naive_bayes import GaussianNB
-from sklearn.metrics import f1_score
+from sklearn.metrics import f1_score, accuracy_score, recall_score
 from lime.lime_tabular import LimeTabularExplainer
 import warnings
 import os
@@ -43,7 +43,7 @@ def nn_model(input_shape):
   x = Dense(2, activation='softmax')(x)
   
   model = Model(input, x)
-  model.compile(loss=CategoricalCrossentropy, optimizer = Adamax(1e-3), metrics = 'MSE')
+  model.compile(loss=categorical_crossentropy, optimizer = Adamax(1e-3), metrics = 'MSE')
   model.summary()
 
   return model
@@ -54,32 +54,33 @@ if __name__ == "__main__":
         warnings.simplefilter("ignore")
         os.environ["PYTHONWARNINGS"] = "ignore"
 
-    pathCSV = 'dataset.csv'
+    pathCSV = 'heart.csv'
     dataset = pd.read_csv(pathCSV, sep=',')
     headers = dataset.columns.tolist()
+    print(headers)
 
     if not os.path.exists('NN/lime'):
         os.makedirs('NN/lime')
 
-    X = dataset[headers[2:-6]]
+    X = dataset[headers[:-1]]
     data = {
-    'Fault': dataset[headers[-6]],
-    'Normal': (~dataset[headers[-6]].astype(bool)).astype(int)
+    'Fault': dataset[headers[-1]],
+    'Normal': (~dataset[headers[-1]].astype(bool)).astype(int)
     }
 
     y = pd.DataFrame(data)
     y = np.array(y)
 
 
-    categorical_features = ['Type']
-    numeric_features = ['Air temperature [K]','Process temperature [K]','Rotational speed [rpm]','Torque [Nm]','Tool wear [min]']
+    categorical_features = ['sex', 'cp', 'fbs', 'restecg', 'exng', 'slp']
+    numeric_features = ['age', 'trtbps', 'chol', 'thalachh', 'oldpeak', 'caa', 'thall']
 
     numeric_transformer = Pipeline(steps=[
                                       ('imputer', SimpleImputer(strategy='median')),
                                       ('scaler', StandardScaler())])
 
     categorical_transformer = Pipeline(steps=[
-                                          ('imputer', SimpleImputer(strategy='constant', fill_value='missing')),
+                                          ('imputer', SimpleImputer(strategy='constant', fill_value=-1)),
                                           ('label', OrdinalEncoder())
                                           ])  
 
@@ -92,13 +93,11 @@ if __name__ == "__main__":
     k = 5           #CAMBIATO, PRIMA ERA 10
     kf = KFold(n_splits=k, random_state=None)
 
-    model = nn_model((6,))
+    model = nn_model((13,))
 
-    mae = []
-    mse = []
-    rmse = []
-    mape = []
+    accuracy = []
     f1 = []
+    recall = []
 
     print('preprocessing done')
 
@@ -108,18 +107,16 @@ if __name__ == "__main__":
 
         data_train_lime = preprocessor.fit_transform(data_train)
         data_test_lime = preprocessor.transform(data_test)
-
-        model.fit(data_train_lime, steps_per_epoch=len(data_train_lime)//16, epochs=10)
+        model.fit(data_train_lime, target_train, steps_per_epoch=len(data_train_lime)//16, epochs=10)
 
         print('training done')
 
             #feature_names_categorical = preprocessor.named_transformers_['cat'].named_steps['onehot'].get_feature_names_out(categorical_features)
         feature_names = categorical_features + numeric_features
         target_pred = model.predict(data_test_lime)
-        mae.append(metrics.mean_absolute_error(target_test, target_pred))
-        mse.append(metrics.mean_squared_error(target_test, target_pred))
-        rmse.append(np.sqrt(metrics.mean_squared_error(target_test, target_pred)))
-        mape.append(smape(target_test, target_pred))
+
+        recall.append(recall_score(target_test, one_hot(argmax(target_pred, axis=-1), num_classes=target_pred.shape[-1]), average='micro'))
+        accuracy.append(accuracy_score(target_test, one_hot(argmax(target_pred, axis=-1), num_classes=target_pred.shape[-1])))
         f1.append(f1_score(target_test, one_hot(argmax(target_pred, axis=-1), num_classes=target_pred.shape[-1]), average='micro'))
 
             #################### LIME Explanation ########################
@@ -129,12 +126,12 @@ if __name__ == "__main__":
                                             mode='classification',
                                             discretize_continuous=False)
             
-        random_numbers = np.random.randint(0, 70, size=5)
+        random_numbers = np.random.randint(0, len(data_test_lime)-1, size=5)
         explanation_instances = []
         for i in random_numbers:
                 explanation_instances.append(data_test_lime[i])
-
     for idx, instance in enumerate(explanation_instances):
+        print(idx, instance)
         exp = explainer.explain_instance(instance,
                                         model.predict,
                                         num_features=5,) #5 most signficant
@@ -166,10 +163,8 @@ if __name__ == "__main__":
     with open('NN/res.txt', 'w') as f:
         sys.stdout = f
         print('\n--------------------- Model errors and report:-------------------------')
-        print('Mean Absolute Error:', np.mean(mae))
-        print('Mean Squared Error:', np.mean(mse))
-        print('Root Mean Squared Error:', np.mean(rmse))
-        print('Mean Average Percentage Error:', np.mean(mape))
+        print('Recall:', np.mean(recall))
+        print('Accuracy', np.mean(accuracy))
         print('Macro f1 score', np.mean(f1))
         
     sys.stdout = original_stdout
