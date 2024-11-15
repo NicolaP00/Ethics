@@ -13,11 +13,8 @@ from sklearn.compose import ColumnTransformer
 from sklearn.pipeline import  Pipeline
 from sklearn.preprocessing import  StandardScaler, OrdinalEncoder
 from sklearn.impute import SimpleImputer
-from sklearn.metrics import f1_score, accuracy_score, recall_score
-from lime.lime_tabular import LimeTabularExplainer
 import warnings
 import os
-from keras.backend import one_hot, argmax
 import matplotlib.pyplot as plt
 
 

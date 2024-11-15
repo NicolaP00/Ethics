@@ -4,7 +4,6 @@ import matplotlib.pyplot as plt
 import sys
 import shap
 
-from sklearn import metrics
 from sklearn.model_selection import GridSearchCV, KFold
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.compose import ColumnTransformer
