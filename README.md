@@ -1,7 +1,16 @@
 # Ethics
-## utils
+## classification
 
-Contiene il materiale utilizzato in progetti precedenti:
-- main.py contiene alcuni metodi classici di explainability, come LIME, Shap e DiCE. Viene utilizzata anche la Anova decomposition, le cui funzioni sono scritte in libraries_anova.py.
-- FoolingAI.py utilizza un Polynomial Regressor fittato utilizzando delle loss function che incentivano l'utilizzo di determinate features a scapito di altre (Adversarial Techniques)
-- Adversarial.py contiene un modello che inganna i metodi di explainability classici, come LIME. Alcune features sono più importanti di altre, ma LIME non se ne accorge.
+Script for explainability of classifiers. The dataset has 13 input features and one output class. The explainability methods used are LIME, SHAP, and DiCE. The models tested include a Naive Bayes, a Decision Tree, a Random Forest, a Gradient Boosting Classifier, and a Neural Network. For adversarial methods, a Polynomial Classifier is tested.
+
+## regression
+
+Script for explainability of regressors. The dataset has 6 input features and 1 output. The explainability methods used are LIME, SHAP, and DiCE. The models tested include a Linear Regressor, a Decision Tree, a Random Forest, a Gradient Boosting Regressor, and a Neural Network. For adversarial methods, a Polynomial Classifier is tested.
+
+## deeplift-classification
+
+Script for using Deeplift with a classification neural network.
+
+## deeplift-regression
+
+Script for using Deeplift with a regression neural network.
