@@ -117,13 +117,11 @@ if __name__ == "__main__":
     X_preprocessed = preprocessor.fit_transform(X)
 
     print('preprocessing done')
+    model = Pipeline(steps=[('preprocessor', preprocessor), ('classifier', mod_grid)])
 
     for train_index , test_index in kf.split(X):
         data_train , data_test = X.iloc[train_index,:],X.iloc[test_index,:]
         target_train , target_test = y[train_index],y[test_index]
-
-        model = Pipeline(steps=[('preprocessor', preprocessor),
-                ('classifier', mod_grid)])
 
         _ = model.fit(data_train, target_train)
 
