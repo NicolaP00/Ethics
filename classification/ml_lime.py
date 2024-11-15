@@ -18,6 +18,8 @@ from tensorflow.keras.backend import one_hot, argmax
 
 def smape(y_true, y_pred):
     y_true = y_true.reshape(y_pred.shape)
+    y_true = y_true[:,0]
+    y_pred = y_pred[:,0]
     division = np.abs(y_pred - y_true) / (y_true + y_pred)
     sum = 0
     for el in division:
@@ -165,11 +167,11 @@ if __name__ == "__main__":
         if mlModel == 'nb' or mlModel == 'gbc':
             exp = explainer.explain_instance(instance,
                                         model_lime.predict_proba,
-                                        num_features=13,) #5 most signficant
+                                        num_features=6,) #6 most signficant
         else:
             exp = explainer.explain_instance(instance,
                                         model_lime.predict,
-                                        num_features=13,) #5 most signficant
+                                        num_features=6,) #6 most signficant
 
         # save Lime explanation results
         exp.save_to_file(f'assets/{mlModel}/lime/lime_explanation_{idx+1}.html')
