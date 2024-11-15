@@ -1,30 +1,23 @@
 import numpy as np
-import csv
 import pandas as pd
 import matplotlib.pyplot as plt
-import seaborn as sns
 import sys
-import statsmodels.api as sm
-from pathlib import Path
 
 from sklearn import metrics
 from sklearn.model_selection import train_test_split
 from sklearn.model_selection import GridSearchCV, KFold
 from sklearn.linear_model import LinearRegression
-from sklearn.neural_network import MLPRegressor
 from sklearn.tree import DecisionTreeRegressor
-from sklearn.compose import make_column_selector as selector
-from sklearn.compose import ColumnTransformer, make_column_transformer
-from sklearn.pipeline import make_pipeline, Pipeline
-from sklearn.preprocessing import OneHotEncoder, StandardScaler, RobustScaler, OrdinalEncoder
+from sklearn.compose import ColumnTransformer
+from sklearn.pipeline import Pipeline
+from sklearn.preprocessing import StandardScaler, OrdinalEncoder
 from sklearn.impute import SimpleImputer
 from sklearn.ensemble import RandomForestRegressor, GradientBoostingRegressor
-from sklearn.base import BaseEstimator, TransformerMixin
 from lime.lime_tabular import LimeTabularExplainer
 import warnings
 import os
 import shutil
-from libraries import create_explanations, summaryPlot, HeatMap_plot, Waterfall, Decision_plot
+from libraries import summaryPlot, HeatMap_plot, Waterfall, Decision_plot
 import dice_ml
 
 def smape(y_true, y_pred):
@@ -36,7 +29,7 @@ def predict_proba_wrapper(X):
 if __name__ == "__main__":
 
     if(len(sys.argv)<2):
-        print("ERROR! Usage: python scriptName.py fileCSV targetN modelloML\n")
+        print("ERROR! Usage: python scriptName.py modelloML\n")
               
         sys.exit(1)
     nome_script, mlModel = sys.argv

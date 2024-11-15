@@ -1,7 +1,5 @@
 import matplotlib.pyplot as plt
 import shap 
-import numpy as np
-import os
 
 def create_explanations(model, X, preprocessor):
     X_preprocessed = preprocessor.fit_transform(X)

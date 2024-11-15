@@ -1,21 +1,13 @@
 import numpy as np
-import csv
 import pandas as pd
 import matplotlib.pyplot as plt
-import seaborn as sns
 import sys
-import statsmodels.api as sm
 from sklearn import metrics
-from sklearn.model_selection import train_test_split
-from sklearn.model_selection import GridSearchCV, KFold
-from sklearn.linear_model import LinearRegression
-from sklearn.neural_network import MLPRegressor
-from sklearn.compose import make_column_selector as selector
-from sklearn.compose import ColumnTransformer, make_column_transformer
+from sklearn.model_selection import KFold
+from sklearn.compose import ColumnTransformer
 from sklearn.pipeline import make_pipeline, Pipeline
-from sklearn.preprocessing import OneHotEncoder, StandardScaler, RobustScaler, OrdinalEncoder
+from sklearn.preprocessing import StandardScaler, OrdinalEncoder
 from sklearn.impute import SimpleImputer
-from sklearn.base import BaseEstimator, TransformerMixin
 from sklearn.metrics import mean_squared_error
 from customModels import PolyRegressor
 import warnings
@@ -31,7 +23,7 @@ def location_fooling(y_true,y_pred,c=['t'],lmbda=1):
 if __name__ == "__main__":
 
     if(len(sys.argv)<2):
-        print("ERROR! Usage: python scriptName.py fileCSV targetN modelloML\n")
+        print("ERROR! Usage: python scriptName.py modelloML\n")
               
         sys.exit(1)
     nome_script, loss = sys.argv

@@ -3,7 +3,6 @@ import shap
 import numpy as np
 import pandas as pd
 import seaborn as sn
-import matplotlib
 import tensorflow as tf
 import random
 import os
@@ -17,7 +16,6 @@ from sklearn.compose import ColumnTransformer
 from sklearn.pipeline import  Pipeline
 from sklearn.impute import SimpleImputer
 from sklearn.preprocessing import  StandardScaler, OrdinalEncoder
-from libraries import create_explanations, summaryPlot, HeatMap_plot, Waterfall, Decision_plot
 
 rng = 69420
 #keras.utils.set_random_seed(42)
@@ -29,14 +27,8 @@ def pred_fn(model):
   def pred(instance):
     print(instance.shape)
     print(type(instance))
-    #instance = instance.reshape(1, instance.shape[0])
     print(model.predict(instance).shape)
     print(type(model.predict(instance)))
-    output = []
-    #for i in model.predict(instance)[:,0]:
-    #    output.append([i, 1-i])
-    #output = np.array(output)
-    #return output
     return model.predict(instance)[:,0]
   return pred
 
@@ -158,7 +150,6 @@ plt.show()
 
 model_filepath = model_folder / 'modelLIME.h5'
 model.save(model_filepath, overwrite=True)
-#x_train.reshape((x_train1,x_train.shape[1]))
 explainer = LimeTabularExplainer(x_train,
                                          feature_names=feature_names,
                                          class_names=['charges'],
@@ -172,8 +163,6 @@ explanation_instances = []
 for i in random_numbers:
     explanation_instances.append(x_test[i])
 for idx, instance in enumerate(explanation_instances):
-    #ins = instance.reshape(1,instance.shape[0])
-    #print(ins.shape)
     exp = explainer.explain_instance(instance,
                                         pred_fn(model),
                                         num_features=5,)

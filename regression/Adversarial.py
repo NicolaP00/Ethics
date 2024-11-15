@@ -7,7 +7,7 @@ from sklearn.model_selection import KFold
 from sklearn.linear_model import LinearRegression
 from sklearn.compose import ColumnTransformer, make_column_transformer
 from sklearn.pipeline import make_pipeline, Pipeline
-from sklearn.preprocessing import OneHotEncoder, StandardScaler, OrdinalEncoder
+from sklearn.preprocessing import StandardScaler, OrdinalEncoder
 from sklearn.impute import SimpleImputer
 from customModels import PolyRegressor, CustomRegressor
 import warnings
@@ -23,7 +23,7 @@ def smape(y_true, y_pred):
 if __name__ == "__main__":
 
     if(len(sys.argv)<1):
-        print("ERROR! Usage: python scriptName.py fileCSV targetN modelloML\n")
+        print("ERROR! Usage: python scriptName.py fileCSV loss\n")
               
         sys.exit(1)
 
