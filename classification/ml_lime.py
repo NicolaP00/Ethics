@@ -17,7 +17,13 @@ import os
 from tensorflow.keras.backend import one_hot, argmax
 
 def smape(y_true, y_pred):
-    return 100 * np.sum(np.abs(y_pred - y_true)) / np.sum(np.abs(y_true) + np.abs(y_pred))
+    y_true = y_true.reshape(y_pred.shape)
+    division = np.abs(y_pred - y_true) / (y_true + y_pred)
+    sum = 0
+    for el in division:
+        if not np.isnan(el):
+            sum += el
+    return 100/len(y_true) * sum
 
 if __name__ == "__main__":
 
