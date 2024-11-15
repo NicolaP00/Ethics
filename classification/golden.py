@@ -138,9 +138,6 @@ if __name__ == "__main__":
 
     importance = []
     coefs = []
-    print([int(el) for el in mape])
-    print(["{:.2f}".format(el) for el in mse])
-    print(["{:.2f}".format(el) for el in f1])
     if mlModel!='nb':
         importance = mod_grid.best_estimator_.feature_importances_
         coefs = pd.DataFrame(mod_grid.best_estimator_.feature_importances_,

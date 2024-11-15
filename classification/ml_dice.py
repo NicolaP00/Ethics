@@ -20,9 +20,6 @@ import dice_ml
 from dice_ml import Dice
 from dice_ml.utils import helpers
 
-def smape(y_true, y_pred):
-    return 100 * np.sum(np.abs(y_pred - y_true)) / np.sum(np.abs(y_true) + np.abs(y_pred))
-
 if __name__ == "__main__":
 
     if(len(sys.argv)<2):
@@ -131,14 +128,6 @@ if __name__ == "__main__":
         _ = model.fit(data_train, target_train)
 
         print('training done')
-
-        feature_names = categorical_features + numeric_features
-        target_pred = model.predict(data_test)
-        mae.append(metrics.mean_absolute_error(target_test, target_pred))
-        mse.append(metrics.mean_squared_error(target_test, target_pred))
-        rmse.append(np.sqrt(metrics.mean_squared_error(target_test, target_pred)))
-        mape.append(smape(target_test, target_pred))
-        f1.append(f1_score(target_test, one_hot(argmax(target_pred, axis=-1), num_classes=target_pred.shape[-1]), average='micro'))
 
 
     Xdice = preprocessor.fit_transform(X)
