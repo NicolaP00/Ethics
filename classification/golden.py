@@ -115,6 +115,7 @@ if __name__ == "__main__":
     rmse = []
     mape = []
     f1 = []
+    acc = []
     X_preprocessed = preprocessor.fit_transform(X)
 
     print('preprocessing done')
@@ -132,6 +133,7 @@ if __name__ == "__main__":
         rmse.append(np.sqrt(metrics.mean_squared_error(target_test, target_pred)))
         mape.append(smape(target_test, target_pred))
         f1.append(metrics.f1_score(target_test, one_hot(argmax(target_pred, axis=-1), num_classes=target_pred.shape[-1]), average='micro'))
+        acc.append(metrics.accuracy_score(target_test, one_hot(argmax(target_pred, axis=-1), num_classes=target_pred.shape[-1])))
 
 
 ####################### GOLDEN STANDARDS #############################
@@ -153,7 +155,8 @@ if __name__ == "__main__":
         print('Mean Squared Error:', np.mean(mse))
         print('Root Mean Squared Error:', np.mean(rmse))
         print('Mean Average Percentage Error:', np.mean(mape))
-        print('Macro f1 score', np.mean(f1))
+        print('Macro f1 score:', np.mean(f1))
+        print('Accuracy:', np.mean(acc))
         print('\nFeature Scores: \n')
         print(coefs)
             
