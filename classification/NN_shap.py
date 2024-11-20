@@ -3,41 +3,33 @@ import pandas as pd
 import sys
 from tensorflow import keras
 import shap
-from keras.layers import Input, Dense
-from keras.models import Model
-from keras.optimizers import Adamax
-from keras.losses import categorical_crossentropy
+from keras.layers import Input, Dense, Activation, Dropout
+from keras.optimizers import Adamax, Adam, SGD
 
-from sklearn.model_selection import KFold
+from sklearn.model_selection import train_test_split
 from sklearn.compose import ColumnTransformer
 from sklearn.pipeline import  Pipeline
 from sklearn.preprocessing import  StandardScaler, OrdinalEncoder
 from sklearn.impute import SimpleImputer
 import warnings
 import os
-import matplotlib.pyplot as plt
+import matplotlib
+from matplotlib import pyplot as plt
 
+matplotlib.use('qt5agg')
 
-def smape(y_true, y_pred):
-    return 100/len(y_true) * np.sum(np.abs(y_pred - y_true) / (np.abs(y_true) + np.abs(y_pred)))
-
-def predict_proba_wrapper(X):
-    return model.predict(X)
-
-def mapp(df, mapping):
-    df['Type'] = df['Type'].map(mapping)
+rng=69
 
 def nn_model(input_shape):
-  input = Input(shape=input_shape)
-  x = Dense(2048, activation='relu')(input)
-  x = Dense(128, activation='relu')(x)
-  x = Dense(1, activation='softmax')(x)
-  
-  model = Model(input, x)
-  model.compile(loss=categorical_crossentropy, optimizer = Adamax(1e-3), metrics = 'MSE')
-  model.summary()
+    model = keras.Sequential()
+    model.add(Input(shape=input_shape))
+    model.add(Dense(2048, activation='relu'))
+    model.add(Dense(128, activation='relu'))
+    model.add(Dense(1, activation='linear'))
+    model.add(Activation("sigmoid"))
 
-  return model
+    model.compile(loss="binary_crossentropy", optimizer = Adamax(learning_rate=1e-5), metrics=["accuracy"])
+    return model
 
 if __name__ == "__main__":
 
@@ -46,16 +38,21 @@ if __name__ == "__main__":
         os.environ["PYTHONWARNINGS"] = "ignore"
 
     pathCSV = 'heart.csv'
-    dataset = pd.read_csv(pathCSV, sep=',')
+    dataset = pd.read_csv(pathCSV)
     headers = dataset.columns.tolist()
-    print(headers)
+    
+    checkpoint_folder = 'ckpt'
+    model_folder = 'model'
+    shap_folder= 'shap'
 
-    if not os.path.exists('assets/NN/shap'):
-        os.makedirs('assets/NN/shap')
-
-    X = dataset[headers[:-1]]
-
-    y = np.array(dataset[headers[-1]])
+    if not os.path.exists('assets/NN'):
+        os.mkdir('assets/NN')
+    if not os.path.exists(f'assets/NN/{checkpoint_folder}'):
+        os.mkdir(f'assets/NN/{checkpoint_folder}')
+    if not os.path.exists(f'assets/NN/{model_folder}'):
+        os.mkdir(f'assets/NN/{model_folder}')
+    if not os.path.exists(f'assets/NN/{shap_folder}'):
+        os.mkdir(f'assets/NN/{shap_folder}')
 
 
     categorical_features = ['sex', 'cp', 'fbs', 'restecg', 'exng', 'slp']
@@ -76,46 +73,91 @@ if __name__ == "__main__":
                                                ('num', numeric_transformer, numeric_features),
                                                ])
 
-    k = 5           #CAMBIATO, PRIMA ERA 10
-    kf = KFold(n_splits=k, random_state=None)
-
-    model = nn_model((13,))
+    train, test = train_test_split(dataset, test_size=0.25)
+    x_train = preprocessor.fit_transform(train.drop(columns=["output"], inplace=False))
+    y_train = train["output"]
+    x_test = preprocessor.transform(test.drop(columns=["output"], inplace=False))
+    y_test = test["output"]
 
     print('preprocessing done')
+    
+    model = nn_model((13,))
 
-    for train_index , test_index in kf.split(X):
-        data_train , data_test = X.iloc[train_index,:],X.iloc[test_index,:]
-        target_train , target_test = y[train_index],y[test_index]
 
-        X_train_preprocessed = preprocessor.fit_transform(data_train)
-        X_test_preprocessed = preprocessor.transform(data_test)
-        model.fit(X_train_preprocessed, target_train, steps_per_epoch=len(X_train_preprocessed)//16, epochs=10)
+    checkpoint_filepath = 'assets/NN/ckpt/checkpoint.model.keras'
+    model_checkpoint_callback = keras.callbacks.ModelCheckpoint(
+        filepath=checkpoint_filepath,
+        monitor='val_accuracy',
+        mode='max',
+        save_best_only=True)
 
-        print('training done')
+    history = model.fit(x_train, y_train, batch_size=128, epochs=2000, validation_split=0.35, shuffle=True, callbacks=[model_checkpoint_callback])
 
-            #feature_names_categorical = preprocessor.named_transformers_['cat'].named_steps['onehot'].get_feature_names_out(categorical_features)
-        feature_names = categorical_features + numeric_features
+    print('training done')
 
-######################### SHAP VALUES #########################
-    explainer = shap.Explainer(model.predict, shap.maskers.Independent(data_train), data=X_train_preprocessed)
-    explanations = explainer(data_train)
-    shap_values = explainer.shap_values(X_test_preprocessed)
-    expected_value = np.array(model.predict(X_test_preprocessed)).mean()
-    explanations.feature_names = [el for el in headers[:-1]]
+    # PLOT LOSS
+
+    plt.plot(history.history['loss'])
+    plt.plot(history.history['val_loss'])
+    plt.title('Model loss')
+    plt.ylabel('Loss')
+    plt.ylim((0,1))
+    plt.xlabel('Epoch')
+    plt.legend(['train', 'valid'], loc='upper right')
+    plt.show()
+
+    # PLOT ACCURACY
+
+    plt.plot(history.history['accuracy'])
+    plt.plot(history.history['val_accuracy'])
+    plt.title('Model accuracy')
+    plt.ylabel('Accuracy')
+    plt.ylim((0,1))
+    plt.xlabel('Epoch')
+    plt.legend(['train', 'valid'], loc='upper right')
+    plt.show()
+    
+    data_test = pd.DataFrame(x_test, columns=categorical_features+numeric_features)
+    print(data_test.describe())
+
+    ######################### SHAP VALUES #########################
+    explainer = shap.KernelExplainer(model.predict, data=x_train)#, shap.maskers.Independent(x_train)
+    explanations = explainer(data_test)[:,:,0]
+    shap_values = explainer.shap_values(data_test)
+    explanations.feature_names = [el for el in categorical_features+numeric_features]
 
     ######################### SHAP PLOTS ##########################
-    shap.plots.bar(explanations, max_display=len(headers[:-1]), show=False)
-    plt.title("Bar plot of SHAP values")
-    plt.savefig('assets/NN/shap/bar.png', bbox_inches='tight')
-    plt.close()
-    shap.plots.beeswarm(explanations, max_display=len(headers[:-1]), show=False)
-    plt.title("Dot plot of SHAP values")
-    plt.savefig('assets/NN/shap/bee.png', bbox_inches='tight')
-    plt.close()
-    shap.plots.heatmap(explanations, max_display=len(headers[:-1]), show=False)
-    plt.title("Heatmap plot of SHAP values")
-    plt.savefig('assets/NN/shap/heatmap.png', bbox_inches='tight')
+    shap.summary_plot(shap_values.reshape(data_test.shape), features=data_test, plot_type='violin', plot_size=(10,10), show=False)
+    plt.title("Violin plot of SHAP values")
+    plt.savefig("./assets/NN/shap/violin.png", bbox_inches="tight")
     plt.close()
 
+    shap.summary_plot(shap_values.reshape(data_test.shape), features=data_test, plot_type='dot', plot_size=(10,10), show=False)
+    plt.title("Dot plot of SHAP values")
+    plt.savefig("./assets/NN/shap/dot.png", bbox_inches="tight")
+    plt.close()
+
+    shap.summary_plot(shap_values.reshape(data_test.shape), features=data_test, plot_type='bar', plot_size=(10,10), show=False)
+    plt.title("Bar plot of (the magnitude of) SHAP values")
+    plt.savefig("./assets/NN/shap/bar.png", bbox_inches="tight")
+    plt.close()
+    
+    shap.plots.heatmap(explanations, plot_width=10, show=False)
+    plt.title("Heatmap of SHAP explanations")
+    plt.savefig("./assets/NN/shap/heatmap.png", bbox_inches="tight")
+    plt.close()
+    
+    examples = 5
+    idxs = np.random.randint(0, x_test.shape[0], examples)
+    for i, idx in enumerate(idxs):
+        shap.plots.waterfall(explanations[idx, :], show=False)
+        plt.title(f"Waterfall SHAP explanation of example #{i+1}")
+        plt.savefig(f"./assets/NN/shap/waterfall_{i+1}.png", bbox_inches="tight")
+        plt.close()
+        plt.figure(figsize=(10,10))
+        shap.plots.decision(explainer.expected_value,explanations.values[idx,:], feature_names=np.array(categorical_features+numeric_features), auto_size_plot=False, show=False)
+        plt.title(f"SHAP decision plot of example #{i+1}")
+        plt.savefig(f"./assets/NN/shap/decision_{i+1}.png", bbox_inches="tight")
+        plt.close()
 
     print('Results saved')
