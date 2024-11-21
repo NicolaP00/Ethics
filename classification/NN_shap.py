@@ -104,7 +104,8 @@ if __name__ == "__main__":
     plt.ylim((0,1))
     plt.xlabel('Epoch')
     plt.legend(['train', 'valid'], loc='upper right')
-    plt.show()
+    plt.savefig("./assets/NN/shap/train_loss.png", bbox_inches="tight")
+    plt.close()
 
     # PLOT ACCURACY
 
@@ -115,7 +116,8 @@ if __name__ == "__main__":
     plt.ylim((0,1))
     plt.xlabel('Epoch')
     plt.legend(['train', 'valid'], loc='upper right')
-    plt.show()
+    plt.savefig("./assets/NN/shap/train_accuracy.png", bbox_inches="tight")
+    plt.close()
     
     data_test = pd.DataFrame(x_test, columns=categorical_features+numeric_features)
     print(data_test.describe())
