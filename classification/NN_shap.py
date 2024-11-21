@@ -16,8 +16,6 @@ import os
 import matplotlib
 from matplotlib import pyplot as plt
 
-matplotlib.use('qt5agg')
-
 rng=69
 
 def nn_model(input_shape):
