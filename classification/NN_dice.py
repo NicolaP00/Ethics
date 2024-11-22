@@ -18,8 +18,6 @@ from matplotlib import pyplot as plt
 import dice_ml
 from dice_ml import Dice
 
-matplotlib.use('qt5agg')
-
 rng=69
 
 def nn_model(input_shape):
