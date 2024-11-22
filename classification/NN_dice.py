@@ -20,6 +20,11 @@ from dice_ml import Dice
 
 rng=69
 
+keras.utils.set_random_seed(rng)
+np.random.seed(rng)
+tf.random.set_seed(rng)
+random.seed(rng)
+
 def nn_model(input_shape):
     model = keras.Sequential()
     model.add(Input(shape=input_shape))
