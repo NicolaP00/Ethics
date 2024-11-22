@@ -48,18 +48,8 @@ if __name__ == "__main__":
     dataset = pd.read_csv(pathCSV)
     headers = dataset.columns.tolist()
     
-    checkpoint_folder = 'ckpt'
-    model_folder = 'model'
-    dice_folder= 'dice'
-
-    if not os.path.exists('assets/NN'):
-        os.mkdir('assets/NN')
-    if not os.path.exists(f'assets/NN/{checkpoint_folder}'):
-        os.mkdir(f'assets/NN/{checkpoint_folder}')
-    if not os.path.exists(f'assets/NN/{model_folder}'):
-        os.mkdir(f'assets/NN/{model_folder}')
-    if not os.path.exists(f'assets/NN/{dice_folder}'):
-        os.mkdir(f'assets/NN/{dice_folder}')
+    if not os.path.exists('assets/NN/dice'):
+        os.makedirs('assets/NN/dice')
 
 
     categorical_features = ['sex', 'cp', 'fbs', 'restecg', 'exng', 'slp']

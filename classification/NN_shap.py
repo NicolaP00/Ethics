@@ -45,19 +45,8 @@ if __name__ == "__main__":
     dataset = pd.read_csv(pathCSV)
     headers = dataset.columns.tolist()
     
-    checkpoint_folder = 'ckpt'
-    model_folder = 'model'
-    shap_folder= 'shap'
-
-    if not os.path.exists('assets/NN'):
-        os.mkdir('assets/NN')
-    if not os.path.exists(f'assets/NN/{checkpoint_folder}'):
-        os.mkdir(f'assets/NN/{checkpoint_folder}')
-    if not os.path.exists(f'assets/NN/{model_folder}'):
-        os.mkdir(f'assets/NN/{model_folder}')
-    if not os.path.exists(f'assets/NN/{shap_folder}'):
-        os.mkdir(f'assets/NN/{shap_folder}')
-
+    if not os.path.exists('assets/NN/shap'):
+        os.makedirs('assets/NN/shap')
 
     categorical_features = ['sex', 'cp', 'fbs', 'restecg', 'exng', 'slp']
     numeric_features = ['age', 'trtbps', 'chol', 'thalachh', 'oldpeak', 'caa', 'thall']

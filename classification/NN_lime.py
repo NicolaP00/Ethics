@@ -46,12 +46,8 @@ if __name__ == "__main__":
     dataset = pd.read_csv(pathCSV)
     headers = dataset.columns.tolist()
     
-    checkpoint_folder = 'ckpt'
-    model_folder = 'model'
-    lime_folder= 'lime'
-
     if not os.path.exists('assets/NN/lime'):
-        os.mkdir('assets/NN/lime')
+        os.makedirs('assets/NN/lime')
 
     categorical_features = ['sex', 'cp', 'fbs', 'restecg', 'exng', 'slp']
     numeric_features = ['age', 'trtbps', 'chol', 'thalachh', 'oldpeak', 'caa', 'thall']
