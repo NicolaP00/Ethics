@@ -47,6 +47,8 @@ if __name__ == "__main__":
     
     if not os.path.exists('assets/NN/shap'):
         os.makedirs('assets/NN/shap')
+    if not os.path.exists('assets/NN/ckpt'):
+        os.makedirs('assets/NN/ckpt')
 
     categorical_features = ['sex', 'cp', 'fbs', 'restecg', 'exng', 'slp']
     numeric_features = ['age', 'trtbps', 'chol', 'thalachh', 'oldpeak', 'caa', 'thall']

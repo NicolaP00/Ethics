@@ -50,6 +50,8 @@ if __name__ == "__main__":
     
     if not os.path.exists('assets/NN/dice'):
         os.makedirs('assets/NN/dice')
+    if not os.path.exists('assets/NN/ckpt'):
+        os.makedirs('assets/NN/ckpt')
 
 
     categorical_features = ['sex', 'cp', 'fbs', 'restecg', 'exng', 'slp']
