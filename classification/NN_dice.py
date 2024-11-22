@@ -4,6 +4,7 @@ import sys
 import tensorflow as tf
 from tensorflow import keras
 import shap
+import random
 from keras.layers import Input, Dense, Activation, Dropout
 from keras.optimizers import Adamax, Adam, SGD
 
