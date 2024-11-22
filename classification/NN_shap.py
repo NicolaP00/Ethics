@@ -113,7 +113,6 @@ if __name__ == "__main__":
     plt.close()
     
     data_test = pd.DataFrame(x_test, columns=categorical_features+numeric_features)
-    print(data_test.describe())
 
     ######################### SHAP VALUES #########################
     explainer = shap.KernelExplainer(model.predict, data=x_train)#, shap.maskers.Independent(x_train)
