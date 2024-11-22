@@ -96,10 +96,34 @@ if __name__ == "__main__":
 
     history = model.fit(x_train, y_train, batch_size=128, epochs=2000, validation_split=0.35, shuffle=True, callbacks=[model_checkpoint_callback])
 
+    
+    # PLOT LOSS
+
+    plt.plot(history.history['loss'])
+    plt.plot(history.history['val_loss'])
+    plt.title('Model loss')
+    plt.ylabel('Loss')
+    plt.ylim((0,1))
+    plt.xlabel('Epoch')
+    plt.legend(['train', 'valid'], loc='upper right')
+    plt.savefig("./assets/NN/lime/train_loss.png", bbox_inches="tight")
+    plt.close()
+
+    # PLOT ACCURACY
+
+    plt.plot(history.history['accuracy'])
+    plt.plot(history.history['val_accuracy'])
+    plt.title('Model accuracy')
+    plt.ylabel('Accuracy')
+    plt.ylim((0,1))
+    plt.xlabel('Epoch')
+    plt.legend(['train', 'valid'], loc='upper right')
+    plt.savefig("./assets/NN/lime/train_accuracy.png", bbox_inches="tight")
+    plt.close()
+
     print('training done')
 
     feature_names = categorical_features+numeric_features
-
 
     #################### LIME Explanation ########################
     explainer = LimeTabularExplainer(x_train,
