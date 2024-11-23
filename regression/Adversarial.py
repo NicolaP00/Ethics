@@ -23,7 +23,7 @@ def smape(y_true, y_pred):
 if __name__ == "__main__":
 
     if(len(sys.argv)<1):
-        print("ERROR! Usage: python scriptName.py fileCSV loss\n")
+        print("ERROR! Usage: python scriptName.py\n")
               
         sys.exit(1)
 
@@ -89,7 +89,7 @@ if __name__ == "__main__":
 
     ################ DiCE #################
         
-    Ncount=3
+    Ncount=2
     '''constraints={}
     desc = X.describe()
     for i in numeric_features:
@@ -173,7 +173,7 @@ if __name__ == "__main__":
 
 
         # save Lime explanation results
-        exp.save_to_file('adv/lime_explanation.html')
+        exp.save_to_file(f'adv/lime_explanation_{idx+1}.html')
 
     
     ######### FEATURE SCORES ###########
@@ -217,7 +217,7 @@ if __name__ == "__main__":
 
     # plot feature importance
     indexes = np.arange(len(labels))
-    plt.bar([x for x in range(len(importance))], importance)
+    plt.bar([x for x in range(len(importance))], importance, color='red')
     plt.xticks(indexes, labels, rotation = '48')
     plt.savefig('adv/bar-ad-fake.png')
     plt.clf()
