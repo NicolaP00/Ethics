@@ -1,4 +1,4 @@
-import keras
+from tensorflow import keras
 import numpy as np
 import pandas as pd
 import seaborn as sn
@@ -14,8 +14,8 @@ from sklearn.pipeline import Pipeline
 from sklearn.compose import ColumnTransformer
 from sklearn.impute import SimpleImputer
 from sklearn.preprocessing import StandardScaler, OrdinalEncoder
-from keras import layers
-from keras import regularizers
+from tensorflow.keras.layers import Input, Dense
+from tensorflow.keras import regularizers
 
 
 rng = 69420
@@ -24,106 +24,86 @@ np.random.seed(rng)
 tf.random.set_random_seed(rng)
 random.seed(rng)
 
-matplotlib.use('qt5agg')
+def nn_model(input_shape):
+    model = keras.Sequential()
+    model.add(Input(input_shape))
+    model.add(Dense(2048, activation='relu'))
+    model.add(Dense(512, activation='relu'))
+    model.add(Dense(1, activation='linear'))
 
-checkpoint_folder = './ckpt'
-model_folder = './model'
-assets_folder = './assets'
+    model.compile(loss="mse", optimizer="adam" , metrics=["mae"])
+    return model
 
-if not os.path.exists(checkpoint_folder):
-    os.mkdir(checkpoint_folder)
-if not os.path.exists(model_folder):
-    os.mkdir(model_folder)
-if not os.path.exists(assets_folder):
-    os.mkdir(assets_folder)
 
-model = keras.Sequential()
-model.add(layers.Dense(512, activation="relu", input_shape=(6,)))
-model.add(layers.Dense(256, activation="relu"))
-model.add(layers.Dense(128, activation="relu"))
-model.add(layers.Dense(64, activation="relu"))
-model.add(layers.Dense(16, activation="relu"))
-model.add(layers.Dense(1, activation="relu"))
-model.add(layers.Dense(1, activation="linear"))
-model.summary()
-scaler = StandardScaler()
-ds = pd.read_csv("./insurance.csv")
-train, test = train_test_split(ds, test_size = 0.25, random_state=np.random.RandomState(rng))
-y_train = scaler.fit_transform(train[['charges']].values)
-x_train = train.drop(columns=['charges'], inplace=False)
-y_test = scaler.transform(test[['charges']].values)
-x_test = test.drop(columns=['charges'], inplace=False)
+model = nn_model((6,))
+
+if not os.path.exists('assets/NN/ckpt'):
+    os.makedirs('assets/NN/ckpt')
+if not os.path.exists('assets/NN/model'):
+    os.makedirs('assets/NN/model')
+
+ds = pd.read_csv('./insurance.csv', sep=',')
 
 feature_names = ds.columns
-
 categorical_features = ['sex', 'smoker', 'region']
-numerical_features = ['age', 'bmi', 'children']
+numeric_features = ['age', 'bmi', 'children']
 
-numeric_transformer = Pipeline(
-                               steps=[
+numeric_transformer = Pipeline(steps=[
                                       ('imputer', SimpleImputer(strategy='median')),
-                                      ('scaler',  StandardScaler()),
-                                     ]
-                              )
+                                      ('scaler', StandardScaler())])
 
-categorical_transformer = Pipeline(
-                                   steps=[
+categorical_transformer = Pipeline(steps=[
                                           ('imputer', SimpleImputer(strategy='constant', fill_value='missing')),
-                                          ('ordinal', OrdinalEncoder(handle_unknown='error')),
-                                         ]
-                                  )
+                                          ('ordinal', OrdinalEncoder(handle_unknown='error'))])   
 
 preprocessor = ColumnTransformer(
                                  transformers=[
-                                               ('num', numeric_transformer, numerical_features),
-                                               ('cat', categorical_transformer, categorical_features),
-                                              ]
-                                )
+                                               ('num', numeric_transformer, numeric_features),
+                                               ('cat', categorical_transformer, categorical_features)
+                                              ])
 
-x_train = preprocessor.fit_transform(x_train)
-x_test = preprocessor.transform(x_test)
-scaler = StandardScaler()
-y_train = scaler.fit_transform(y_train)
-y_test = scaler.transform(y_test)
+train, test = train_test_split(ds, test_size = 0.25, random_state=np.random.RandomState(rng))
+y_train = train['charges']
+y_test = test['charges']
+x_train = preprocessor.fit_transform(train.drop(columns=['charges'], inplace=False))
+x_test = preprocessor.transform(test.drop(columns=['charges'], inplace=False))
 
-
-model.compile(
-    loss='mse',
-    optimizer=keras.optimizers.SGD(lr=1e-4),
-    metrics=["mae"],
-)
-
-checkpoint_filepath = './ckpt/checkpoint.model.keras'
+checkpoint_filepath = 'assets/NN/ckpt/checkpoint.model.keras'
 model_checkpoint_callback = keras.callbacks.ModelCheckpoint(
     filepath=checkpoint_filepath,
     monitor='val_mae',
-    mode='min',
+    mode='max',
     save_best_only=True)
 
-history = model.fit(x_train, y_train, batch_size=64, epochs=15000, validation_split=0.25, shuffle=True, callbacks=[model_checkpoint_callback])
+history = model.fit(x_train, y_train, batch_size=128, epochs=1500, validation_split=0.25, shuffle=True, callbacks=[model_checkpoint_callback]) 
 
-eval_score = model.evaluate(x_test, y_test)
+print('training done')
 
-print(eval_score)
+# PLOT LOSS
 
 plt.plot(history.history['loss'])
 plt.plot(history.history['val_loss'])
-plt.title('model_loss')
-plt.ylabel('loss')
-plt.xlabel('epoch')
-plt.legend(['train','valid'], loc='upper right')
-plt.show()
+plt.title('Model loss')
+plt.ylabel('Loss')
+plt.xlabel('Epoch')
+plt.ylim([1.5e7,5e7])
+plt.legend(['train', 'valid'], loc='upper right')
+plt.savefig('assets/NN/train_loss.png',bbox_inches='tight')
+plt.close()
 
-plt.plot(history.history['mae'])
-plt.plot(history.history['val_mae'])
-plt.title('model_mae')
-plt.ylabel('mae')
-plt.xlabel('epoch')
-plt.legend(['train','valid'], loc='upper left')
-plt.show()
+# PLOT ACCURACY
+
+plt.plot(history.history['mean_absolute_error'])
+plt.plot(history.history['val_mean_absolute_error'])
+plt.title('Model mae')
+plt.ylabel('Mean Absolute Error')
+plt.xlabel('Epoch')
+plt.legend(['train', 'valid'], loc='upper right')
+plt.savefig('assets/NN/train_mae.png',bbox_inches='tight')
+plt.close()
 
 
-model_filepath = './model/model.h5'
+model_filepath = 'assets/NN/model/model.h5'
 model.save(model_filepath, overwrite=True)
 
 
@@ -155,6 +135,6 @@ scores_pd.boxplot(figsize=(15,10), grid=False)
 #plt.axhline(y=0, color='k')
 plt.ylim((0,1))
 plt.title("Importance of features according to DeepLift")
-plt.savefig('./assets/features_importance.png')
+plt.savefig('./assets/NN/features_importance.png')
 plt.close()
 print(scores_pd.describe())
