@@ -84,7 +84,7 @@ x_test = preprocessor.transform(test.drop(columns=['charges'], inplace=False))
 
 print(x_train)
 
-checkpoint_filepath = './ckpt/checkpoint.model.keras'
+checkpoint_filepath = 'assets/NN/ckpt/checkpoint.model.keras'
 model_checkpoint_callback = keras.callbacks.ModelCheckpoint(
     filepath=checkpoint_filepath,
     monitor='val_mae',
