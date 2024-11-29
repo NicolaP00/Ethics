@@ -79,23 +79,23 @@ if __name__ == "__main__":
     mse = []
     rmse = []
     mape = []
+    test = []
 
     for train_index , test_index in kf.split(X):
         data_train , data_test = X.iloc[train_index,:],X.iloc[test_index,:]
         target_train , target_test = y[train_index] , y[test_index]
 
         model = models_regression['lr']['estimator']
-    
-
 
         _ = model.fit(data_train, target_train)
 
-        target_pred = model.predict(data_test)
-    
-        mae.append(metrics.mean_absolute_error(target_test, target_pred))
-        mse.append(metrics.mean_squared_error(target_test, target_pred))
-        rmse.append(np.sqrt(metrics.mean_squared_error(target_test, target_pred)))
-        mape.append(smape(target_test, target_pred))
+        test.append((data_test, target_test))
+    for d,t in test:
+        target_pred = model.predict(d)
+        mae.append(metrics.mean_absolute_error(t, target_pred))
+        mse.append(metrics.mean_squared_error(t, target_pred))
+        rmse.append(np.sqrt(metrics.mean_squared_error(t, target_pred)))
+        mape.append(smape(t, target_pred))
 
     
     ######### FEATURE SCORES ###########

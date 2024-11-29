@@ -117,6 +117,7 @@ if __name__ == "__main__":
     mse = []
     rmse = []
     mape = []
+    test = []
 
     X_preprocessed = preprocessor.fit_transform(X)
 
@@ -135,12 +136,7 @@ if __name__ == "__main__":
         _ = model.fit(data_train, target_train)
 
         feature_names = numeric_features + categorical_features
-        target_pred = model_lime.predict(data_test_lime)
-    
-        mae.append(metrics.mean_absolute_error(target_test, target_pred))
-        mse.append(metrics.mean_squared_error(target_test, target_pred))
-        rmse.append(np.sqrt(metrics.mean_squared_error(target_test, target_pred)))
-        mape.append(smape(target_test, target_pred))
+        test.append([data_test_lime, target_test])
 
         explainer = LimeTabularExplainer(data_train_lime,
                                          feature_names=feature_names,
@@ -152,6 +148,14 @@ if __name__ == "__main__":
         explanation_instances = []
         for i in random_numbers:
             explanation_instances.append(data_test_lime[i])
+    
+    for t in test:
+        target_pred = model_lime.predict(t[0])
+    
+        mae.append(metrics.mean_absolute_error(t[1], target_pred))
+        mse.append(metrics.mean_squared_error(t[1], target_pred))
+        rmse.append(np.sqrt(metrics.mean_squared_error(t[1], target_pred)))
+        mape.append(smape(t[1], target_pred))
 
     for idx, instance in enumerate(explanation_instances):
         exp = explainer.explain_instance(instance,
