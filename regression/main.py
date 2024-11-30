@@ -250,9 +250,8 @@ df_combined = pd.concat(data, ignore_index=True)
 for i in range(len(df_combined)):
     df_combined.iloc[i] = df_combined.iloc[i] - X_test.iloc[i//Ncount]
 df_combined.to_csv(path_or_buf=f'{mlModel}/dice/counterfactuals.csv', index=False, sep=',')
-df_combined.dtypes
 df_filtered = df_combined[df_combined['output'] != 0]
-count_per_column = df_filtered.apply(lambda x: (x != 0).sum())
+count_per_column = df_filtered.apply(lambda x: (x != 0).sum() * abs(df_filtered.loc[x != 0, 'output']).sum()/1000)
 diff_per_column = df_filtered.apply(lambda x: (abs(x)).sum())
 #relative_per_column = df_filtered.apply(lambda x: (abs(x)/abs(df_filtered['output'])/(x != 0)).sum())
 
