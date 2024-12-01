@@ -121,12 +121,6 @@ if __name__ == "__main__":
     kf = KFold(n_splits=k, shuffle=True, random_state=69)
     mod_grid = GridSearchCV(models_classification[mlModel]['estimator'], models_classification[mlModel]['param'], cv=5, return_train_score = False, scoring='f1_macro', n_jobs = 8)
 
-    mae = []
-    mse = []
-    rmse = []
-    mape = []
-    f1 = []
-    X_preprocessed = preprocessor.fit_transform(X)
 
     print('preprocessing done')
 
@@ -136,20 +130,15 @@ if __name__ == "__main__":
 
         data_train_lime = preprocessor.fit_transform(data_train)
         data_test_lime = preprocessor.transform(data_test)
-
         model_lime = Pipeline(steps=[('classifier', mod_grid)])
 
         _ = model_lime.fit(data_train_lime, target_train)
 
         print('training done')
 
-        feature_names = categorical_features + numeric_features
-        target_pred = model_lime.predict(data_test_lime)
-        mae.append(metrics.mean_absolute_error(target_test, target_pred))
-        mse.append(metrics.mean_squared_error(target_test, target_pred))
-        rmse.append(np.sqrt(metrics.mean_squared_error(target_test, target_pred)))
-        mape.append(smape(target_test, target_pred))
-        f1.append(f1_score(target_test, one_hot(argmax(target_pred, axis=-1), num_classes=target_pred.shape[-1]), average='micro'))
+    feature_names = categorical_features + numeric_features
+
+
 
             #################### LIME Explanation ########################
     explainer = LimeTabularExplainer(data_train_lime,
