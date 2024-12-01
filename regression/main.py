@@ -20,6 +20,8 @@ import shutil
 from libraries import summaryPlot, HeatMap_plot, Waterfall, Decision_plot
 import dice_ml
 
+rng = 69420
+
 def smape(y_true, y_pred):
     return 100/len(y_true) * np.sum(np.abs(y_pred - y_true) / (np.abs(y_true) + np.abs(y_pred)))
 
@@ -113,57 +115,37 @@ if __name__ == "__main__":
     kf = KFold(n_splits=k, random_state=None)
     mod_grid = GridSearchCV(models_regression[mlModel]['estimator'], models_regression[mlModel]['param'], cv=5, return_train_score = False, scoring='neg_mean_squared_error', n_jobs = 8)
 
-    mae = []
-    mse = []
-    rmse = []
-    mape = []
-    test = []
-
     X_preprocessed = preprocessor.fit_transform(X)
+    x_train, x_test, y_train, y_test = train_test_split(X_preprocessed, y, test_size = 0.25, random_state=np.random.RandomState(rng))
 
-    for train_index , test_index in kf.split(X):
-        data_train , data_test = X.iloc[train_index,:],X.iloc[test_index,:]
-        target_train , target_test = y[train_index] , y[test_index]
 
-        data_train_lime = preprocessor.fit_transform(data_train)
-        data_test_lime = preprocessor.transform(data_test)
+    model = Pipeline(steps=[('regressor', mod_grid)])
 
-        model_lime = Pipeline(steps=[('regressor', mod_grid)])
-        model = Pipeline(steps=[('preprocessor', preprocessor),
-                ('regressor', mod_grid)])
+    _ = model.fit(x_train, y_train)
 
-        _ = model_lime.fit(data_train_lime, target_train)
-        _ = model.fit(data_train, target_train)
+    feature_names = numeric_features + categorical_features
+    target_pred = model.predict(x_test)
+    mae = metrics.mean_absolute_error(y_test, target_pred)
+    mse = metrics.mean_squared_error(y_test, target_pred)
+    rmse = np.sqrt(metrics.mean_squared_error(y_test, target_pred))
+    mape = smape(y_test, target_pred)
 
-        feature_names = numeric_features + categorical_features
-        test.append([data_test_lime, target_test])
-
-        explainer = LimeTabularExplainer(data_train_lime,
+    explainer = LimeTabularExplainer(x_train,
                                          feature_names=feature_names,
                                          class_names=['charges'],
                                          mode='regression',
                                          discretize_continuous=True)
         
-        random_numbers = np.random.randint(0, len(data_test_lime), size=5)
-        explanation_instances = []
-        for i in random_numbers:
-            explanation_instances.append(data_test_lime[i])
-    
-    for t in test:
-        target_pred = model_lime.predict(t[0])
-    
-        mae.append(metrics.mean_absolute_error(t[1], target_pred))
-        mse.append(metrics.mean_squared_error(t[1], target_pred))
-        rmse.append(np.sqrt(metrics.mean_squared_error(t[1], target_pred)))
-        mape.append(smape(t[1], target_pred))
+    random_numbers = np.random.randint(0, len(x_test), size=5)
+    explanation_instances = []
+    for i in random_numbers:
+        explanation_instances.append(x_test[i])
 
     for idx, instance in enumerate(explanation_instances):
         exp = explainer.explain_instance(instance,
-                                        model_lime.predict,
+                                        model.predict,
                                         num_features=5,) #5 most signficant
         
-
-
         # save Lime explanation results
         exp.save_to_file(f'{mlModel}/lime/lime_explanation_{idx}.html')
 
@@ -250,8 +232,9 @@ df_combined = pd.concat(data, ignore_index=True)
 for i in range(len(df_combined)):
     df_combined.iloc[i] = df_combined.iloc[i] - X_test.iloc[i//Ncount]
 df_combined.to_csv(path_or_buf=f'{mlModel}/dice/counterfactuals.csv', index=False, sep=',')
+df_combined.dtypes
 df_filtered = df_combined[df_combined['output'] != 0]
-count_per_column = df_filtered.apply(lambda x: (x != 0).sum() * abs(df_filtered.loc[x != 0, 'output']).sum()/1000)
+count_per_column = df_filtered.apply(lambda x: (x != 0).sum())
 diff_per_column = df_filtered.apply(lambda x: (abs(x)).sum())
 #relative_per_column = df_filtered.apply(lambda x: (abs(x)/abs(df_filtered['output'])/(x != 0)).sum())
 
@@ -272,10 +255,10 @@ original_stdout = sys.stdout
 with open('%s/res.txt' %(mlModel), 'w') as f:
     sys.stdout = f
     print('\n--------------------- Model errors and report:-------------------------')
-    print('Mean Absolute Error:', np.mean(mae))
-    print('Mean Squared Error:', np.mean(mse))
-    print('Root Mean Squared Error:', np.mean(rmse))
-    print('Mean Average Percentage Error:', np.mean(mape))
+    print('Mean Absolute Error:', mae)
+    print('Mean Squared Error:', mse)
+    print('Root Mean Squared Error:', rmse)
+    print('Mean Average Percentage Error:', mape)
     print('\nFeature Scores: \n')
     print(coefs)
             

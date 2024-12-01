@@ -3,21 +3,20 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import sys
 from sklearn import metrics
-from sklearn.model_selection import KFold
+from sklearn.model_selection import KFold, train_test_split
 from sklearn.compose import ColumnTransformer
-from sklearn.pipeline import make_pipeline, Pipeline
+from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import StandardScaler, OrdinalEncoder
 from sklearn.impute import SimpleImputer
-from sklearn.metrics import mean_squared_error
+
 from customModels import PolyRegressor
 import warnings
 import os
 
+rng = 69420
+
 def smape(y_true, y_pred):
     return 100/len(y_true) * np.sum(np.abs(y_pred - y_true) / (np.abs(y_true) + np.abs(y_pred)))
-
-def location_fooling(y_true,y_pred,c=['t'],lmbda=1):
-    loss = mean_squared_error(y_true,y_pred)+lmbda*sum()
     
 
 if __name__ == "__main__":
@@ -72,30 +71,17 @@ if __name__ == "__main__":
     k = 10
     kf = KFold(n_splits=k, random_state=None)
 
-    X = preprocessor.fit_transform(X)
-    X = pd.DataFrame(X, columns=labels)
+    X_preprocessed = preprocessor.fit_transform(X)
+    x_train, x_test, y_train, y_test = train_test_split(X_preprocessed, y, test_size = 0.25, random_state=np.random.RandomState(rng))
 
-    mae = []
-    mse = []
-    rmse = []
-    mape = []
-    test = []
+    model = models_regression['lr']['estimator']
+    _ = model.fit(x_train, y_train)
 
-    for train_index , test_index in kf.split(X):
-        data_train , data_test = X.iloc[train_index,:],X.iloc[test_index,:]
-        target_train , target_test = y[train_index] , y[test_index]
-
-        model = models_regression['lr']['estimator']
-
-        _ = model.fit(data_train, target_train)
-
-        test.append((data_test, target_test))
-    for d,t in test:
-        target_pred = model.predict(d)
-        mae.append(metrics.mean_absolute_error(t, target_pred))
-        mse.append(metrics.mean_squared_error(t, target_pred))
-        rmse.append(np.sqrt(metrics.mean_squared_error(t, target_pred)))
-        mape.append(smape(t, target_pred))
+    target_pred = model.predict(x_test)
+    mae = metrics.mean_absolute_error(y_test, target_pred)
+    mse = metrics.mean_squared_error(y_test, target_pred)
+    rmse = np.sqrt(metrics.mean_squared_error(y_test, target_pred))
+    mape = smape(y_test, target_pred)
 
     
     ######### FEATURE SCORES ###########

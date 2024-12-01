@@ -3,16 +3,19 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import sys
 from sklearn import metrics
-from sklearn.model_selection import KFold
+from sklearn.model_selection import train_test_split
 from sklearn.compose import ColumnTransformer
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import StandardScaler, OrdinalEncoder
 from sklearn.impute import SimpleImputer
 from customModels import PolyClassifier
-from sklearn.metrics import f1_score
+from sklearn.metrics import f1_score, accuracy_score
 
 import warnings
 import os
+
+rng = 1
+
 
 def smape(y_true, y_pred):
     return 100/len(y_true) * np.sum(np.abs(y_pred - y_true) / (np.abs(y_true) + np.abs(y_pred)))
@@ -58,7 +61,6 @@ if __name__ == "__main__":
                                                ('num', numeric_transformer, numeric_features),
                                                ('cat', categorical_transformer, categorical_features)
                                               ])
-    model_reg = ['lc']
 
     param_lr = [{'fit_intercept':[True,False], 'normalize':[True,False]}]
 
@@ -69,35 +71,17 @@ if __name__ == "__main__":
               },
     }
 
-    k = 10
-    kf = KFold(n_splits=k, random_state=None)
 
     X_preprocessed = preprocessor.fit_transform(X)
-    X = pd.DataFrame(X_preprocessed, columns=labels)
+    x_train, x_test, y_train, y_test = train_test_split(X_preprocessed, y, test_size = 0.25, random_state=np.random.RandomState(rng))
 
-    mae = []
-    mse = []
-    rmse = []
-    mape = []
-    f1 = []
+    model = models_classification['lc']['estimator']
+    _ = model.fit(x_train, y_train)
 
-    for train_index , test_index in kf.split(X):
-        data_train , data_test = X.iloc[train_index,:],X.iloc[test_index,:]
-        target_train , target_test = y[train_index] , y[test_index]
+    target_pred = model.predict(x_test)
+    f1 = f1_score(y_test, target_pred, average='micro')
+    acc = accuracy_score(y_test, target_pred)
 
-        model = models_classification['lc']['estimator']
-    
-
-
-        _ = model.fit(data_train, target_train)
-
-        target_pred = model.predict(data_test)
-    
-        mae.append(metrics.mean_absolute_error(target_test, target_pred))
-        mse.append(metrics.mean_squared_error(target_test, target_pred))
-        rmse.append(np.sqrt(metrics.mean_squared_error(target_test, target_pred)))
-        mape.append(smape(target_test, target_pred))
-        f1.append(f1_score(target_test, target_pred, average='micro'))
 
     
     ######### FEATURE SCORES ###########
@@ -127,11 +111,9 @@ if __name__ == "__main__":
     with open('lc/fooling/res-%s.txt'%loss, 'w') as f:
         sys.stdout = f
         print('\n--------------------- Model errors and report:-------------------------')
-        print('Mean Absolute Error:', np.mean(mae))
-        print('Mean Squared Error:', np.mean(mse))
-        print('Root Mean Squared Error:', np.mean(rmse))
-        print('Mean Average Percentage Error:', np.mean(mape))
-        print('Macro f1 score', np.mean(f1))
+
+        print('accuracy score', acc)
+        print('f1 score', f1)
         print('\nFeature Scores: \n')
         print(coefs)
                 

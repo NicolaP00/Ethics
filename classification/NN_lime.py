@@ -68,9 +68,6 @@ if __name__ == "__main__":
                                                 ('cat', categorical_transformer, categorical_features),
                                                ('num', numeric_transformer, numeric_features),
                                                ])
-
-    
-    #y = np.array(y)
     
     train, test = train_test_split(dataset, test_size=0.25)
     x_train = preprocessor.fit_transform(train.drop(columns=["output"], inplace=False))
