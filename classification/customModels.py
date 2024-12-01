@@ -23,12 +23,12 @@ class PolyClassifier:
 
         for _ in range(self.n_iterations):
             # Calcolo delle previsioni con l'attuale configurazione dei pesi e del bias
-            y_predicted = self._sigmoid(np.dot(X_poly, self.weights) + self.bias)
+            z = np.dot(X_poly, self.weights) + self.bias
+            y_predicted = 1 / (1 + np.exp(-z))
 
-            if self.adv=='lf':                                                                #Voglio la variabilie 'sex' importante (a 10000) e le altre no (a 0)
+            if self.adv=='lf':                                                                #Voglio la variabile 'fbs' importante
                 m = np.zeros(n_features)
-                m[3] = 700
-                m[4] = 15000
+                m[1] = 1.0
                 penalty = np.sum(np.sign(self.weights)*(np.abs(self.weights)-m))
             elif self.adv=='adv':
                 w = 0
@@ -41,11 +41,11 @@ class PolyClassifier:
             db = (1 / n_samples) * np.sum(y_predicted - y)
 
             # Updating weights
-            self.weights -= self.learning_rate * dw
+            self.weights -= self.learning_rate * dw      
             self.bias -= self.learning_rate * db
         if self.adv == 'af':
-            w1=0  #age
-            w2=5 #region
+            w1=1  #cp
+            w2=2  #trtbps
             w01 = abs(self.weights[w1].copy())
             w02 = abs(self.weights[w2].copy())
             penalty = np.zeros(n_features)
