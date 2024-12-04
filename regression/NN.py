@@ -40,32 +40,30 @@ model.add(layers.Dense(128, activation="relu"))
 model.add(layers.Dense(1, activation="linear"))
 #model.add(layers.Activation("sigmoid"))
 
-model.compile(optimizer='adam', 
-              loss='mean_squared_error', 
-              metrics=['mae'])
 
-if not os.path.exists('NNmodels'):
-        os.makedirs('NNmodels')
+if not os.path.exists('NNmodel/lime'):
+        os.makedirs('NNmodel/lime')
+
+if not os.path.exists('NNmodel/shap'):
+        os.makedirs('NNmodel/shap')
 
 
 folder = os.path.dirname(os.path.abspath(__file__))
-checkpoint_folder = Path(__file__).parent / "ckpt"
-model_folder = Path(__file__).parent / "model"
+checkpoint_folder = Path(__file__).parent / "NNmodel"
 dataset_folder = Path(__file__).parent / "insurance.csv"
 if not os.path.exists(checkpoint_folder):
     os.mkdir(checkpoint_folder)
-if not os.path.exists(model_folder):
-    os.mkdir(model_folder)
-print(dataset_folder)
+if not os.path.exists(checkpoint_folder):
+    os.mkdir(checkpoint_folder)
 ds = pd.read_csv(dataset_folder, sep=',')
 train, test = train_test_split(ds, test_size = 0.25, random_state=np.random.RandomState(rng))
 y_train = train['charges']
 X = train.drop(columns=['charges'], inplace=False)
 
 model.summary()
-feature_names = X.columns
 categorical_features = ['sex', 'smoker', 'region']
 numeric_features = ['age', 'bmi', 'children']
+feature_names = numeric_features+categorical_features
 
 numeric_transformer = Pipeline(steps=[
                                       ('imputer', SimpleImputer(strategy='median')),
@@ -96,13 +94,7 @@ model.compile(
     metrics=["mean_squared_error"],
 )
 
-model.fit(x_train, y_train, batch_size=32, epochs=50, shuffle=True)
-
-model.compile(
-    loss='mean_squared_error',
-    optimizer=keras.optimizers.Adamax(lr=0.01),
-    metrics=["mean_squared_error"],
-)
+#model.fit(x_train, y_train, batch_size=32, epochs=50, shuffle=True)
 
 checkpoint_filepath = './ckpt/checkpoint.model.keras'
 model_checkpoint_callback = keras.callbacks.ModelCheckpoint(
@@ -111,7 +103,7 @@ model_checkpoint_callback = keras.callbacks.ModelCheckpoint(
     mode='max',
     save_best_only=True)
 
-history = model.fit(x_train, y_train, batch_size=128, epochs=10, validation_split=0.25, shuffle=True, callbacks=[model_checkpoint_callback]) #erano 150 eopchs
+history = model.fit(x_train, y_train, batch_size=128, epochs=15, validation_split=0.2, shuffle=True, callbacks=[model_checkpoint_callback]) #erano 1500 eopchs
 
 eval_score = model.evaluate(x_test, y_test)
 
@@ -121,34 +113,22 @@ plt.plot(history.history['loss'])
 plt.plot(history.history['val_loss'])
 plt.title('model_loss')
 plt.ylabel('loss')
-plt.ylim((0,1))
 plt.xlabel('epoch')
 plt.legend(['train','valid'], loc='upper right')
-plt.show()
+plt.savefig('NNmodel/loss.png')
 
-plt.plot(history.history['accuracy'])
-plt.plot(history.history['val_accuracy'])
-plt.title('model_accuracy')
-plt.ylabel('accuracy')
-plt.ylim((0.5,1))
+plt.plot(history.history['mean_squared_error'])
+plt.plot(history.history['val_mean_squared_error'])
+plt.title('model_mse')
+plt.ylabel('mse')
 plt.xlabel('epoch')
 plt.legend(['train','valid'], loc='upper left')
-plt.show()
-
-y_pred = model.predict(x_test)
-y_pred = (y_pred >= 0.5).astype('int')
-res = confusion_matrix(y_pred=y_pred, y_true=y_test)
-df_cm = pd.DataFrame(res, range(2), range(2))
-sn.heatmap(res,annot=True)
-plt.ylabel('True class')
-plt.xlabel('Predicted class')
-plt.show()
+plt.savefig('NNmodel/mse.png')
 
 
 
 
-
-model_filepath = model_folder / 'modelLIME.h5'
+model_filepath = checkpoint_folder / 'modelLIME.h5'
 model.save(model_filepath, overwrite=True)
 explainer = LimeTabularExplainer(x_train,
                                          feature_names=feature_names,
@@ -167,31 +147,60 @@ for idx, instance in enumerate(explanation_instances):
                                         pred_fn(model),
                                         num_features=5,)
     
-    exp.save_to_file(f'NNmodels/lime_explanation_{idx}.html')
+    exp.save_to_file(f'NNmodel/lime/lime_explanation_{idx+1}.html')
 
 
 ############################## SHAP ##########################
 
-ex = shap.KernelExplainer(model.predict, x_train)
+ex = shap.Explainer(model, x_train[:5])
+explanations = ex(x_train[:5])
 
-shap_explanation = ex(x_test)[:,:,0]
+#shap_explanation = ex(x_test)[:,:,0]
 
-shap_values = ex.shap_values(x_test, nsamples=5)
+#shap_values = ex.shap_values(x_test, nsamples=5)
 
-shap_explanation.feature_names = [el for el in x_test.columns]
+#shap_explanation.feature_names = [el for el in X.columns]
 
-shap.summary_plot(shap_values.reshape(x_test.shape), features=x_test, plot_type='violin')
+fig, ax = plt.subplots()
+print(feature_names)
+print(np.array(x_train).shape)
+shap.summary_plot(explanations, x_train[-5], feature_names=feature_names, plot_type='violin')
+plt.tight_layout()
+fig.savefig('NNmodel/shap/violin.png')
+plt.close()
 
-shap.summary_plot(shap_values.reshape(x_test.shape), features=x_test, plot_type='dot')
+fig, ax = plt.subplots()
+shap.summary_plot([[s] for s in shap_values], features=x_test, plot_type='dot')
+plt.tight_layout()
+fig.savefig('NNmodel/shap/dot.png')
+plt.close()
 
-shap.summary_plot(shap_values.reshape(x_test.shape), features=x_test, plot_type='bar')
+fig, ax = plt.subplots()
+shap.summary_plot([[s] for s in shap_values], features=x_test, plot_type='bar')
+plt.tight_layout()
+fig.savefig('NNmodel/shap/bar.png')
+plt.close()
 
+fig, ax = plt.subplots()
 shap.plots.heatmap(shap_explanation)
+plt.tight_layout()
+plt.title("Features Influence's heatmap")
+fig.savefig('NNmodel/shap/heatmap.png')
+plt.close()
 
 examples = 5
 idx = np.random.randint(0, x_test.shape[0], examples)
 
-for i in idx:
-    shap.plots.waterfall(shap_explanation[i, :])
-    shap.plots.decision(ex.expected_value,shap_explanation.values[i,:])
+for i in range(len(idx)):
+    shap.plots.waterfall(shap_explanation[idx[i], :])
+    ax.set_title(f"Example {i+1}")
+    plt.tight_layout()
+    plt.savefig(f'NNmodel/shap/waterfall_{i+1}.png')
+    plt.close()
+
+    shap.plots.decision(ex.expected_value,shap_explanation.values[idx[i],:])
+    ax.set_title(f"Example {i+1}")
+    plt.tight_layout()
+    plt.savefig(f'NNmodel/shap/decision_{i+1}.png')
+    plt.close()
     

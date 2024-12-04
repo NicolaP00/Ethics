@@ -5,11 +5,13 @@ import shap
 def create_explanations(model, X_preprocessed, mlModel):
 
     # Add feature names
-    if mlModel=='rf' or mlModel=='dt':
-        explainer = shap.TreeExplainer(model['regressor'].best_estimator_, X_preprocessed, check_additivity=False)
+    if mlModel=='lr':
+        explainer = shap.Explainer(model['regressor'].best_estimator_, X_preprocessed)
+        explanations = explainer(X_preprocessed)
+
     else:
         explainer = shap.Explainer(model['regressor'].best_estimator_, X_preprocessed, check_additivity=False)
-    explanations = explainer(X_preprocessed, check_additivity=False)
+        explanations = explainer(X_preprocessed, check_additivity=False)
     return explanations
 
 def summaryPlot(model, X_preprocessed, lf, output_folder, save_name, plot_type, mlModel):
@@ -50,11 +52,12 @@ def Waterfall(model, X_preprocessed, output_folder, num_example, save_name, lf, 
 def Decision_plot(model, X_preprocessed, output_folder, num_example, save_name, lf, mlModel):
 
     # Dataset preprocessing
-    if mlModel=='rf' or mlModel=='dt':
-        explainer = shap.TreeExplainer(model['regressor'].best_estimator_, X_preprocessed, check_additivity=False)
+    if mlModel=='lr':
+        explainer = shap.Explainer(model['regressor'].best_estimator_, X_preprocessed)
+        explanations = explainer(X_preprocessed)
     else:
         explainer = shap.Explainer(model['regressor'].best_estimator_, X_preprocessed, check_additivity=False)
-    explanations = explainer(X_preprocessed, check_additivity=False)
+        explanations = explainer(X_preprocessed, check_additivity=False)
     explanations.feature_names = [el for el in lf]
     explanation = explanations.values[num_example, :]
 

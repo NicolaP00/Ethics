@@ -45,11 +45,11 @@ if __name__ == "__main__":
     pathCSV = 'insurance.csv'
     dataset = pd.read_csv(pathCSV)
     feature_names = dataset.columns.tolist()
-    
-    if not os.path.exists('assets/NN/shap'):
-        os.makedirs('assets/NN/shap')
-    if not os.path.exists('assets/NN/ckpt'):
-        os.makedirs('assets/NN/ckpt')
+
+    if not os.path.exists('NNmodel/shap'):
+        os.makedirs('NNmodel/shap')
+    if not os.path.exists('NNmodel/ckpt'):
+        os.makedirs('NNmodel/ckpt')
 
     categorical_features = ['sex', 'smoker', 'region']
     numeric_features = ['age', 'bmi', 'children']
@@ -81,7 +81,7 @@ if __name__ == "__main__":
     model = nn_model((6,))
 
 
-    checkpoint_filepath = 'assets/NN/ckpt/checkpoint.model.keras'
+    checkpoint_filepath = 'NNmodel/ckpt/checkpoint.model.keras'
     model_checkpoint_callback = keras.callbacks.ModelCheckpoint(
         filepath=checkpoint_filepath,
         monitor='val_accuracy',
@@ -99,7 +99,7 @@ if __name__ == "__main__":
     plt.ylabel('Loss')
     plt.xlabel('Epoch')
     plt.legend(['train', 'valid'], loc='upper right')
-    plt.savefig("./assets/NN/lime/train_loss.png", bbox_inches="tight")
+    plt.savefig("./NNmodel/train_loss.png", bbox_inches="tight")
     plt.close()
 
     # PLOT ACCURACY
@@ -110,7 +110,7 @@ if __name__ == "__main__":
     plt.ylabel('Mean Absolute Error')
     plt.xlabel('Epoch')
     plt.legend(['train', 'valid'], loc='upper right')
-    plt.savefig("./assets/NN/lime/train_mae.png", bbox_inches="tight")
+    plt.savefig("./NNmodel/train_mae.png", bbox_inches="tight")
     plt.close()
 
     print('training done')
@@ -127,22 +127,22 @@ if __name__ == "__main__":
     ######################### SHAP PLOTS ##########################
     shap.summary_plot(shap_values.reshape(x_test.shape), features=data_test, plot_type='violin', plot_size=(10,10), show=False)
     plt.title("Violin plot of SHAP values")
-    plt.savefig("./assets/NN/shap/violin.png", bbox_inches="tight")
+    plt.savefig("./NNmodel/shap/violin.png", bbox_inches="tight")
     plt.close()
 
     shap.summary_plot(shap_values.reshape(x_test.shape), features=data_test, plot_type='dot', plot_size=(10,10), show=False)
     plt.title("Dot plot of SHAP values")
-    plt.savefig("./assets/NN/shap/dot.png", bbox_inches="tight")
+    plt.savefig("./NNmodel/shap/dot.png", bbox_inches="tight")
     plt.close()
 
     shap.summary_plot(shap_values.reshape(x_test.shape), features=data_test, plot_type='bar', plot_size=(10,10), show=False)
     plt.title("Bar plot of (the magnitude of) SHAP values")
-    plt.savefig("./assets/NN/shap/bar.png", bbox_inches="tight")
+    plt.savefig("./NNmodel/shap/bar.png", bbox_inches="tight")
     plt.close()
     
     shap.plots.heatmap(explanations, plot_width=10, show=False)
     plt.title("Heatmap of SHAP explanations")
-    plt.savefig("./assets/NN/shap/heatmap.png", bbox_inches="tight")
+    plt.savefig("./NNmodel/shap/heatmap.png", bbox_inches="tight")
     plt.close()
     
     examples = 5
@@ -150,12 +150,12 @@ if __name__ == "__main__":
     for i, idx in enumerate(idxs):
         shap.plots.waterfall(explanations[idx, :], show=False)
         plt.title(f"Waterfall SHAP explanation of example #{i+1}")
-        plt.savefig(f"./assets/NN/shap/waterfall_{i+1}.png", bbox_inches="tight")
+        plt.savefig(f"./NNmodel/shap/waterfall_{i+1}.png", bbox_inches="tight")
         plt.close()
         plt.figure(figsize=(10,10))
         shap.plots.decision(explainer.expected_value,explanations.values[idx,:], feature_names=np.array(categorical_features+numeric_features), auto_size_plot=False, show=False)
         plt.title(f"SHAP decision plot of example #{i+1}")
-        plt.savefig(f"./assets/NN/shap/decision_{i+1}.png", bbox_inches="tight")
+        plt.savefig(f"./NNmodel/shap/decision_{i+1}.png", bbox_inches="tight")
         plt.close()
 
     print('Results saved')
