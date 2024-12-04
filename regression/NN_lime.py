@@ -46,10 +46,10 @@ if __name__ == "__main__":
     dataset = pd.read_csv(pathCSV)
     feature_names = dataset.columns.tolist()
     
-    if not os.path.exists('assets/NN/lime'):
-        os.makedirs('assets/NN/lime')
-    if not os.path.exists('assets/NN/ckpt'):
-        os.makedirs('assets/NN/ckpt')
+    if not os.path.exists('NNmodel/lime'):
+        os.makedirs('NNmodel/lime')
+    if not os.path.exists('NNmodel/ckpt'):
+        os.makedirs('NNmodel/ckpt')
 
     categorical_features = ['sex', 'smoker', 'region']
     numeric_features = ['age', 'bmi', 'children']
@@ -83,7 +83,7 @@ if __name__ == "__main__":
     model = nn_model((6,))
 
 
-    checkpoint_filepath = 'assets/NN/ckpt/checkpoint.model.keras'
+    checkpoint_filepath = 'NNmodel/ckpt/checkpoint.model.keras'
     model_checkpoint_callback = keras.callbacks.ModelCheckpoint(
         filepath=checkpoint_filepath,
         monitor='val_accuracy',
@@ -101,7 +101,7 @@ if __name__ == "__main__":
     plt.ylabel('Loss')
     plt.xlabel('Epoch')
     plt.legend(['train', 'valid'], loc='upper right')
-    plt.savefig("./assets/NN/lime/train_loss.png", bbox_inches="tight")
+    plt.savefig("./NNmodel/train_loss.png", bbox_inches="tight")
     plt.close()
 
     # PLOT ACCURACY
@@ -112,7 +112,7 @@ if __name__ == "__main__":
     plt.ylabel('Mean Absolute Error')
     plt.xlabel('Epoch')
     plt.legend(['train', 'valid'], loc='upper right')
-    plt.savefig("./assets/NN/lime/train_mae.png", bbox_inches="tight")
+    plt.savefig("./NNmodel/train_mae.png", bbox_inches="tight")
     plt.close()
 
     print('training done')
@@ -136,6 +136,6 @@ if __name__ == "__main__":
                                          num_features=5,) #5 most signficant
 
         # save Lime explanation results
-        exp.save_to_file(f'assets/NN/lime/lime_explanation_{idx}.html')
+        exp.save_to_file(f'NNmodel/lime/lime_explanation_{idx}.html')
  
     print('Lime finished')
