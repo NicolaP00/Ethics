@@ -49,12 +49,12 @@ def pred_fn(model):
 
 model = nn_model((6,))
 
-if not os.path.exists('assets/NN/dice'):
-        os.makedirs('assets/NN/dice')
+if not os.path.exists('NNmodel/dice'):
+        os.makedirs('NNmodel/dice')
 
 
-if not os.path.exists('assets/NN/ckpt'):
-    os.mkdir('assets/NN/ckpt')
+if not os.path.exists('NNmodel/ckpt'):
+    os.mkdir('NNmodel/ckpt')
 
 ds = pd.read_csv('./insurance.csv', sep=',')
 
@@ -84,7 +84,7 @@ x_test = preprocessor.transform(test.drop(columns=['charges'], inplace=False))
 
 print(x_train)
 
-checkpoint_filepath = 'assets/NN/ckpt/checkpoint.model.keras'
+checkpoint_filepath = 'NNmodel/ckpt/checkpoint.model.keras'
 model_checkpoint_callback = keras.callbacks.ModelCheckpoint(
     filepath=checkpoint_filepath,
     monitor='val_mae',
@@ -104,7 +104,7 @@ plt.ylabel('Loss')
 plt.xlabel('Epoch')
 plt.ylim([1.5e7,5e7])
 plt.legend(['train', 'valid'], loc='upper right')
-plt.savefig('assets/NN/dice/train_loss.png',bbox_inches='tight')
+plt.savefig('NNmodel/dice/train_loss.png',bbox_inches='tight')
 plt.close()
 
 # PLOT ACCURACY
@@ -115,7 +115,7 @@ plt.title('Model mae')
 plt.ylabel('Mean Absolute Error')
 plt.xlabel('Epoch')
 plt.legend(['train', 'valid'], loc='upper right')
-plt.savefig('assets/NN/dice/train_mae.png',bbox_inches='tight')
+plt.savefig('NNmodel/dice/train_mae.png',bbox_inches='tight')
 plt.close()
 
 x_dice = pd.DataFrame(x_train, columns=numeric_features+categorical_features)
@@ -146,13 +146,13 @@ for cf_example in dice_exp.cf_examples_list:
 df_combined = pd.concat(data, ignore_index=True)
 for i in range(len(df_combined)):
     df_combined.iloc[i] = df_combined.iloc[i] - query_instance.iloc[i//Ncount]
-df_combined.to_csv(path_or_buf=f'assets/NN/dice/conterfactuals.csv', index=False, sep=',')
+df_combined.to_csv(path_or_buf=f'NNmodel/dice/conterfactuals.csv', index=False, sep=',')
 df_combined.dtypes
 df_filtered=df_combined[df_combined[feature_names[-1]] != 0]
 count_per_column = df_filtered.apply(lambda x: (x != 0).sum())
 diff_per_column = df_filtered.apply(lambda x: (abs(x)).sum())
 original_stdout = sys.stdout
-with open(f'assets/NN/dice/count.txt','w') as f:
+with open(f'NNmodel/dice/count.txt','w') as f:
     sys.stdout = f
     print('\n--------------------- Counterfactual absolute counts: ---------------------')
     print(diff_per_column)
