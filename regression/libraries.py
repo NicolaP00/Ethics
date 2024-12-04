@@ -1,16 +1,19 @@
 import matplotlib.pyplot as plt
+import numpy as np
 import shap 
 
-def create_explanations(model, X, preprocessor):
-    X_preprocessed = preprocessor.fit_transform(X)
+def create_explanations(model, X_preprocessed, mlModel):
 
     # Add feature names
-    explainer = shap.Explainer(model['regressor'].best_estimator_, X_preprocessed)
-    explanations = explainer(X_preprocessed)
-    return explanations, X_preprocessed
+    if mlModel=='rf' or mlModel=='dt':
+        explainer = shap.TreeExplainer(model['regressor'].best_estimator_, X_preprocessed, check_additivity=False)
+    else:
+        explainer = shap.Explainer(model['regressor'].best_estimator_, X_preprocessed, check_additivity=False)
+    explanations = explainer(X_preprocessed, check_additivity=False)
+    return explanations
 
-def summaryPlot(model, X, preprocessor, lf, output_folder, save_name, plot_type):
-    explanations, X_preprocessed = create_explanations(model, X, preprocessor)
+def summaryPlot(model, X_preprocessed, lf, output_folder, save_name, plot_type, mlModel):
+    explanations = create_explanations(model, X_preprocessed, mlModel)
 
     # Create plot 
     fig, ax = plt.subplots()
@@ -19,8 +22,8 @@ def summaryPlot(model, X, preprocessor, lf, output_folder, save_name, plot_type)
     fig.savefig(output_folder + save_name)
     plt.close()
 
-def HeatMap_plot(model, X, preprocessor, output_folder, save_name, lf):
-    explanations, _ = create_explanations(model, X, preprocessor)
+def HeatMap_plot(model, X_preprocessed, output_folder, save_name, lf, mlModel):
+    explanations = create_explanations(model, X_preprocessed, mlModel)
     explanations.feature_names = [el for el in lf]
 
     # Create plot
@@ -31,8 +34,8 @@ def HeatMap_plot(model, X, preprocessor, output_folder, save_name, lf):
     fig.savefig(output_folder + save_name)
     plt.close()
     
-def Waterfall(model, X, preprocessor, output_folder, num_example, save_name, lf):
-    explanations, _ = create_explanations(model, X, preprocessor)
+def Waterfall(model, X_preprocessed, output_folder, num_example, save_name, lf, mlModel):
+    explanations = create_explanations(model, X_preprocessed, mlModel)
     explanations.feature_names = [el for el in lf]
     explanation = explanations[num_example, :]
 
@@ -44,12 +47,14 @@ def Waterfall(model, X, preprocessor, output_folder, num_example, save_name, lf)
     plt.savefig(output_folder + save_name)
     plt.close()
 
-def Decision_plot(model, X, preprocessor, output_folder, num_example, save_name, lf):
+def Decision_plot(model, X_preprocessed, output_folder, num_example, save_name, lf, mlModel):
 
     # Dataset preprocessing
-    X_preprocessed = preprocessor.fit_transform(X)
-    explainer = shap.Explainer(model['regressor'].best_estimator_, X_preprocessed)
-    explanations = explainer(X_preprocessed)
+    if mlModel=='rf' or mlModel=='dt':
+        explainer = shap.TreeExplainer(model['regressor'].best_estimator_, X_preprocessed, check_additivity=False)
+    else:
+        explainer = shap.Explainer(model['regressor'].best_estimator_, X_preprocessed, check_additivity=False)
+    explanations = explainer(X_preprocessed, check_additivity=False)
     explanations.feature_names = [el for el in lf]
     explanation = explanations.values[num_example, :]
 

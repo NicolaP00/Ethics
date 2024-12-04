@@ -23,7 +23,8 @@ class PolyRegressor:
 
         for _ in range(self.n_iterations):
             # Calcolo delle previsioni con l'attuale configurazione dei pesi e del bias
-            y_predicted = np.dot(X_poly, self.weights) + self.bias
+            z = np.dot(X_poly, self.weights) + self.bias
+            y_predicted = 1 / (1 + np.exp(-z))
 
             if self.adv=='lf':                                                                #Voglio la variabilie 'sex' importante (a 10000) e le altre no (a 0)
                 m = np.zeros(n_features)

@@ -111,8 +111,6 @@ if __name__ == "__main__":
                 },
     }
 
-    k = 10
-    kf = KFold(n_splits=k, random_state=None)
     mod_grid = GridSearchCV(models_regression[mlModel]['estimator'], models_regression[mlModel]['param'], cv=5, return_train_score = False, scoring='neg_mean_squared_error', n_jobs = 8)
 
     X_preprocessed = preprocessor.fit_transform(X)
@@ -182,27 +180,25 @@ plt.close()
 
 ############################## SHAP ##########################
 
-_ = summaryPlot(model, X, preprocessor, labels, mlModel+'/shap/', 'Dot_plot', 'dot')
-_ = summaryPlot(model, X, preprocessor, labels, mlModel+'/shap/', 'Violin_plot', 'violin')
-ordered_labels = summaryPlot(model, X, preprocessor, labels, mlModel+'/shap/', 'Bar_plot', 'bar')
-HeatMap_plot(model, X, preprocessor, mlModel+'/shap/', 'HeatMap_plot', labels)
+_ = summaryPlot(model, X_preprocessed, labels, mlModel+'/shap/', 'Dot_plot', 'dot', mlModel)
+_ = summaryPlot(model, X_preprocessed, labels, mlModel+'/shap/', 'Violin_plot', 'violin', mlModel)
+ordered_labels = summaryPlot(model, X_preprocessed, labels, mlModel+'/shap/', 'Bar_plot', 'bar', mlModel)
+HeatMap_plot(model, X_preprocessed, mlModel+'/shap/', 'HeatMap_plot', labels, mlModel)
     
 # Show some specific examples
 Showed_examples = 5 
 idx = np.random.randint(0, X.shape[0], Showed_examples)
 for i,el in enumerate(idx):
-    Decision_plot(model, X, preprocessor, mlModel+'/shap/', el, f'Decision_plot{i}', labels)
-    Waterfall(model, X, preprocessor, mlModel+'/shap/', el, f'Waterfall_Plot_{i}', labels)
+    Decision_plot(model, X_preprocessed, mlModel+'/shap/', el, f'Decision_plot{i}', labels, mlModel)
+    Waterfall(model, X_preprocessed, mlModel+'/shap/', el, f'Waterfall_Plot_{i}', labels, mlModel)
 
 ############################## DiCE ##########################
 
 Ncount=30
 
-Xdice = preprocessor.fit_transform(X)
-
 constraints={}
     
-Xdice = pd.DataFrame(Xdice, columns=labels)
+Xdice = pd.DataFrame(X_preprocessed, columns=labels)
 
 desc=Xdice.describe()
 for i in numeric_features:
