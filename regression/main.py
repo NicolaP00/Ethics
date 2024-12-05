@@ -76,7 +76,7 @@ if __name__ == "__main__":
                 'rf',
                 'gbr']
 
-    param_lr = [{'fit_intercept':[True,False], 'normalize':[True,False], 'copy_X':[True, False]}]
+    param_lr = [{'fit_intercept':[True,False], 'copy_X':[True, False]}]
 
     param_dt = [{'max_depth': [5,10,20]}]
 
@@ -261,5 +261,4 @@ with open('%s/res.txt' %(mlModel), 'w') as f:
 
         
 sys.stdout = original_stdout
-shutil.rmtree(os.getcwd() + "\__pycache__")
 print('Results saved')
