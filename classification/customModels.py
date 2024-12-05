@@ -28,7 +28,7 @@ class PolyClassifier:
 
             if self.adv=='lf':                                                                #Voglio la variabile 'fbs' importante
                 m = np.zeros(n_features)
-                m[1] = 1.0
+                m[11] = 1.0
                 penalty = np.sum(np.sign(self.weights)*(np.abs(self.weights)-m))
             elif self.adv=='adv':
                 w = 0
@@ -45,7 +45,7 @@ class PolyClassifier:
             self.bias -= self.learning_rate * db
         if self.adv == 'af':
             w1=1  #cp
-            w2=2  #trtbps
+            w2=2  #sex
             w01 = abs(self.weights[w1].copy())
             w02 = abs(self.weights[w2].copy())
             penalty = np.zeros(n_features)
