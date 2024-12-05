@@ -62,7 +62,7 @@ if __name__ == "__main__":
                                                ('cat', categorical_transformer, categorical_features)
                                               ])
 
-    param_lr = [{'fit_intercept':[True,False], 'normalize':[True,False]}]
+    param_lr = [{'fit_intercept':[True,False]}]
 
     models_classification = {
         'lc': {'name': 'Linear Classifier',
@@ -99,7 +99,7 @@ if __name__ == "__main__":
 
     indexes = np.arange(len(labels))
     plt.bar([x for x in range(len(importance))], importance)
-    plt.xticks(indexes, labels, rotation = '48')
+    plt.xticks(indexes, labels, rotation=48)
     plt.savefig('lc/fooling/bar-%s.png'%loss)
     plt.clf()
     plt.cla()

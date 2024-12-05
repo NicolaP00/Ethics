@@ -60,7 +60,7 @@ if __name__ == "__main__":
 
     models_regression = {
         'lr': {'name': 'Linear Regression',
-               'estimator': LinearRegression(fit_intercept=False,copy_X=True,normalize=False),
+               'estimator': LinearRegression(fit_intercept=False,copy_X=True),
               },
         'fake': {'name':'Custom',
                  'estimator':PolyRegressor(adv='lf'),
@@ -189,7 +189,7 @@ if __name__ == "__main__":
     # plot feature importance
     indexes = np.arange(len(labels))
     plt.bar([x for x in range(len(importance))], importance)
-    plt.xticks(indexes, labels, rotation = '48')
+    plt.xticks(indexes, labels, rotation=48)
     plt.savefig('adv/bar-ad-good.png')
     plt.clf()
     plt.cla()
@@ -218,7 +218,7 @@ if __name__ == "__main__":
     # plot feature importance
     indexes = np.arange(len(labels))
     plt.bar([x for x in range(len(importance))], importance, color='red')
-    plt.xticks(indexes, labels, rotation = '48')
+    plt.xticks(indexes, labels, rotation=48)
     plt.savefig('adv/bar-ad-fake.png')
     plt.clf()
     plt.cla()

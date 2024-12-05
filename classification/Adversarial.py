@@ -185,7 +185,7 @@ if __name__ == "__main__":
     # plot feature importance
     indexes = np.arange(len(labels))
     plt.bar([x for x in range(len(importance))], importance)
-    plt.xticks(indexes, labels, rotation = '48')
+    plt.xticks(indexes, labels, rotation=48)
     plt.savefig('lc/adv/bar-ad-good.png')
     plt.clf()
     plt.cla()
@@ -214,7 +214,7 @@ if __name__ == "__main__":
     # plot feature importance
     indexes = np.arange(len(labels))
     plt.bar([x for x in range(len(importance))], importance)
-    plt.xticks(indexes, labels, rotation = '48')
+    plt.xticks(indexes, labels, rotation=48)
     plt.savefig('lc/adv/bar-ad-fake.png')
     plt.clf()
     plt.cla()
