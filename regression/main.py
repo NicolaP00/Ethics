@@ -183,14 +183,14 @@ plt.close()
 _ = summaryPlot(model, X_preprocessed, labels, mlModel+'/shap/', 'Dot_plot', 'dot', mlModel)
 _ = summaryPlot(model, X_preprocessed, labels, mlModel+'/shap/', 'Violin_plot', 'violin', mlModel)
 ordered_labels = summaryPlot(model, X_preprocessed, labels, mlModel+'/shap/', 'Bar_plot', 'bar', mlModel)
-HeatMap_plot(model, X_preprocessed, mlModel+'/shap/', 'HeatMap_plot', labels, mlModel)
+#HeatMap_plot(model, X_preprocessed, mlModel+'/shap/', 'HeatMap_plot', labels, mlModel)
     
 # Show some specific examples
 Showed_examples = 5 
 idx = np.random.randint(0, X.shape[0], Showed_examples)
 for i,el in enumerate(idx):
     Decision_plot(model, X_preprocessed, mlModel+'/shap/', el, f'Decision_plot{i}', labels, mlModel)
-    Waterfall(model, X_preprocessed, mlModel+'/shap/', el, f'Waterfall_Plot_{i}', labels, mlModel)
+    #Waterfall(model, X_preprocessed, mlModel+'/shap/', el, f'Waterfall_Plot_{i}', labels, mlModel)
 
 ############################## DiCE ##########################
 
@@ -230,9 +230,9 @@ for i in range(len(df_combined)):
 df_combined.to_csv(path_or_buf=f'{mlModel}/dice/counterfactuals.csv', index=False, sep=',')
 df_combined.dtypes
 df_filtered = df_combined[df_combined['output'] != 0]
-count_per_column = df_filtered.apply(lambda x: (x != 0).sum())
+#count_per_column = df_filtered.apply(lambda x: (x != 0).sum())
 diff_per_column = df_filtered.apply(lambda x: (abs(x)).sum())
-#relative_per_column = df_filtered.apply(lambda x: (abs(x)/abs(df_filtered['output'])/(x != 0)).sum())
+count_per_column = df_filtered.apply(lambda x: (abs(df_filtered['output'])*(x != 0)).sum())
 
 original_stdout = sys.stdout
 with open(f'{mlModel}/dice/count.txt', 'w') as f:
