@@ -1,5 +1,4 @@
 from tensorflow import keras
-import shap
 import numpy as np
 import pandas as pd
 import tensorflow as tf
@@ -9,17 +8,15 @@ import sys
 from tensorflow import keras
 from matplotlib import pyplot as plt
 from sklearn.model_selection import train_test_split
-from keras.layers import Input, Dense, Activation, Dropout
-from pathlib import Path
-from lime.lime_tabular import LimeTabularExplainer
+from keras.layers import Input, Dense
 from sklearn.compose import ColumnTransformer
 from sklearn.pipeline import  Pipeline
 from sklearn.impute import SimpleImputer
 from sklearn.preprocessing import  StandardScaler, OrdinalEncoder
-import warnings
 from matplotlib import pyplot as plt
 import dice_ml
 from dice_ml import Dice
+from math import sqrt
 
 rng = 69420
 keras.utils.set_random_seed(rng)
@@ -118,6 +115,7 @@ plt.legend(['train', 'valid'], loc='upper right')
 plt.savefig('NNmodel/dice/train_mae.png',bbox_inches='tight')
 plt.close()
 
+
 x_dice = pd.DataFrame(x_train, columns=numeric_features+categorical_features)
 Ncount = 3
 
@@ -154,6 +152,10 @@ count_per_column = df_filtered.apply(lambda x: (x != 0).sum() * abs(df_filtered.
 
 diff_per_column = df_filtered.apply(lambda x: (abs(x)).sum())
 original_stdout = sys.stdout
+
+print('RMSE : ', sqrt(history.history['val_loss'][-1]))
+print('MAE : ', history.history['val_mae'][-1])
+
 with open(f'NNmodel/dice/count.txt','w') as f:
     sys.stdout = f
     print('\n--------------------- Counterfactual absolute counts: ---------------------')

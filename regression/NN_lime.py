@@ -3,10 +3,9 @@ import pandas as pd
 import sys
 import tensorflow as tf
 from tensorflow import keras
-import shap
 import random
-from keras.layers import Input, Dense, Activation, Dropout
-from keras.optimizers import Adamax, Adam, SGD
+from keras.layers import Input, Dense
+from math import sqrt
 
 from sklearn.model_selection import train_test_split
 from sklearn.compose import ColumnTransformer
@@ -15,7 +14,6 @@ from sklearn.preprocessing import  StandardScaler, OrdinalEncoder
 from sklearn.impute import SimpleImputer
 import warnings
 import os
-import matplotlib
 from matplotlib import pyplot as plt
 from lime.lime_tabular import LimeTabularExplainer
 
@@ -137,5 +135,8 @@ if __name__ == "__main__":
 
         # save Lime explanation results
         exp.save_to_file(f'NNmodel/lime/lime_explanation_{idx}.html')
+    
+    print('RMSE : ', sqrt(history.history['val_loss'][-1]))
+    print('MAE : ', history.history['val_mae'][-1])
  
     print('Lime finished')

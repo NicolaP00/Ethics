@@ -5,8 +5,7 @@ import tensorflow as tf
 from tensorflow import keras
 import shap
 import random
-from keras.layers import Input, Dense, Activation, Dropout
-from keras.optimizers import Adamax, Adam, SGD
+from keras.layers import Input, Dense
 
 from sklearn.model_selection import train_test_split
 from sklearn.compose import ColumnTransformer
@@ -15,9 +14,9 @@ from sklearn.preprocessing import  StandardScaler, OrdinalEncoder
 from sklearn.impute import SimpleImputer
 import warnings
 import os
-import matplotlib
 from matplotlib import pyplot as plt
 import shap
+from math import sqrt
 
 rng=69420
 
@@ -157,5 +156,8 @@ if __name__ == "__main__":
         plt.title(f"SHAP decision plot of example #{i+1}")
         plt.savefig(f"./NNmodel/shap/decision_{i+1}.png", bbox_inches="tight")
         plt.close()
+
+    print('RMSE : ', sqrt(history.history['val_loss'][-1]))
+    print('MAE : ', history.history['val_mae'][-1])
 
     print('Results saved')
