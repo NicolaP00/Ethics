@@ -172,7 +172,7 @@ else:
 
 indexes = np.arange(len(labels))
 plt.bar([x for x in range(len(importance))], importance)
-plt.xticks(indexes, labels, rotation = '48')
+plt.xticks(indexes, labels, rotation=48)
 plt.savefig(mlModel + '/bar.png')
 plt.clf()
 plt.cla()
