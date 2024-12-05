@@ -119,7 +119,7 @@ plt.savefig('NNmodel/dice/train_mae.png',bbox_inches='tight')
 plt.close()
 
 x_dice = pd.DataFrame(x_train, columns=numeric_features+categorical_features)
-Ncount = 30
+Ncount = 3
 
 constraints={}
 desc = x_dice.describe()
@@ -149,7 +149,9 @@ for i in range(len(df_combined)):
 df_combined.to_csv(path_or_buf=f'NNmodel/dice/conterfactuals.csv', index=False, sep=',')
 df_combined.dtypes
 df_filtered=df_combined[df_combined[feature_names[-1]] != 0]
-count_per_column = df_filtered.apply(lambda x: (x != 0).sum())
+#count_per_column = df_filtered.apply(lambda x: (x != 0).sum())
+count_per_column = df_filtered.apply(lambda x: (x != 0).sum() * abs(df_filtered.loc[x != 0, feature_names[-1]]).sum()/1000000)
+
 diff_per_column = df_filtered.apply(lambda x: (abs(x)).sum())
 original_stdout = sys.stdout
 with open(f'NNmodel/dice/count.txt','w') as f:
