@@ -4,5 +4,5 @@ keras
 scikit-learn
 matplotlib
 lime
-shap
+shap>=0.46
 tensorflow
