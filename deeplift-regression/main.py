@@ -71,8 +71,8 @@ x_test = preprocessor.transform(test.drop(columns=['charges'], inplace=False))
 checkpoint_filepath = 'assets/NN/ckpt/checkpoint.model.keras'
 model_checkpoint_callback = keras.callbacks.ModelCheckpoint(
     filepath=checkpoint_filepath,
-    monitor='val_mae',
-    mode='max',
+    monitor='val_mean_absolute_error',
+    mode='min',
     save_best_only=True)
 
 history = model.fit(x_train, y_train, batch_size=128, epochs=1500, validation_split=0.25, shuffle=True, callbacks=[model_checkpoint_callback]) 
