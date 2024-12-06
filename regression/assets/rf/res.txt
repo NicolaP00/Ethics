@@ -1,0 +1,18 @@
+
+--------------------- Model errors and report:-------------------------
+Mean Absolute Error: 2911.575598246575
+Mean Squared Error: 25672792.768048592
+Root Mean Squared Error: 5066.832616936205
+Mean Average Percentage Error: 14.723067943553131
+
+Feature Scores: 
+
+          Coefficients
+age           0.147676
+bmi           0.150651
+children      0.021724
+sex           0.009078
+smoker        0.651312
+region        0.019559
+
+Best Parameters used:  {'bootstrap': True, 'max_depth': 20, 'max_features': 'sqrt', 'min_samples_leaf': 2, 'min_samples_split': 2}

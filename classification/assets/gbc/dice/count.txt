@@ -1,0 +1,34 @@
+
+--------------------- Counterfactual absolute counts: ---------------------
+sex          199.000000
+cp          1586.000000
+fbs           80.000000
+restecg      154.000000
+exng         160.000000
+slp          330.000000
+age          565.290587
+trtbps       585.472210
+chol         583.830721
+thalachh     827.688868
+oldpeak     1117.052117
+caa         1429.789701
+thall       1314.268318
+output      1710.000000
+dtype: float64
+
+--------------------- Counterfactual relative counts: ---------------------
+sex         1.000000
+cp          2.295224
+fbs         1.000000
+restecg     1.272727
+exng        1.000000
+slp         1.304348
+age         1.723447
+trtbps      2.192780
+chol        2.538394
+thalachh    2.364825
+oldpeak     2.737873
+caa         1.785006
+thall       2.116374
+output      1.000000
+dtype: float64

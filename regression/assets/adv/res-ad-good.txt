@@ -1,0 +1,9 @@
+
+--------------------- Model errors and report:-------------------------
+          Coefficients
+age        3756.879783
+bmi        1496.110017
+children    385.942704
+sex        4106.772349
+smoker    26195.140292
+region     2389.496200

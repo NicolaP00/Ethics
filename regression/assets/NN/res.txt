@@ -1,0 +1,6 @@
+
+--------------------- Model errors and report:-------------------------
+Mean absolute error: 2941.8840112277285
+Mean squared error: 25432449.98704456
+Root mean squared error: 25432449.98704456
+Symmetric mean absolute percentage error: 25432449.98704456

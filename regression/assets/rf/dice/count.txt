@@ -1,0 +1,20 @@
+
+--------------------- Counterfactual absolute counts:-------------------------
+age         3.232646e+03
+bmi         5.264874e+03
+children    4.812228e+03
+sex         6.220000e+02
+smoker      5.970000e+02
+region      1.472000e+03
+output      4.563408e+07
+dtype: float64
+
+--------------------- Counterfactual relative counts:-------------------------
+age           0.058006
+bmi           0.100879
+children      0.111203
+sex           0.365095
+smoker        0.071599
+region        0.407301
+output      124.378109
+dtype: float64

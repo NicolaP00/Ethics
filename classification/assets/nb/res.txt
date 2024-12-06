@@ -1,0 +1,10 @@
+
+--------------------- Model errors and report:-------------------------
+Macro f1 score: 0.8421052631578947
+Accuracy: 0.8421052631578947
+
+Feature Scores: 
+
+[]
+
+Best Parameters used:  {'var_smoothing': 0.01}

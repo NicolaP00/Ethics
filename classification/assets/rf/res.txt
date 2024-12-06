@@ -1,0 +1,23 @@
+
+--------------------- Model errors and report:-------------------------
+Macro f1 score: 0.868421052631579
+Accuracy: 0.868421052631579
+
+Feature Scores: 
+
+          Coefficients
+age           0.036268
+sex           0.147397
+cp            0.005098
+trtbps        0.017313
+chol          0.081196
+fbs           0.048126
+restecg       0.079177
+thalachh      0.055400
+exng          0.059556
+oldpeak       0.106387
+slp           0.083144
+caa           0.147882
+thall         0.133057
+
+Best Parameters used:  {'bootstrap': False, 'max_depth': 10, 'max_features': 'sqrt', 'min_samples_leaf': 2, 'min_samples_split': 2}

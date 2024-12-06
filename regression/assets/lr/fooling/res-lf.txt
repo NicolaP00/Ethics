@@ -1,0 +1,16 @@
+
+--------------------- Model errors and report:-------------------------
+Mean Absolute Error: 167011.14638600958
+Mean Squared Error: 34758957926.80791
+Root Mean Squared Error: 186437.5443058825
+Mean Average Percentage Error: 83.78976061556077
+
+Feature Scores: 
+
+          Coefficients
+age      -13523.217334
+bmi      -18966.656186
+children -27176.835011
+sex        5113.710805
+smoker     3775.820203
+region    70603.065336
