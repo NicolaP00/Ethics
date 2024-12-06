@@ -233,7 +233,7 @@ if __name__ == "__main__":
     ################ DiCE #######################
 
     Xdice = pd.DataFrame(X_preprocessed, columns=categorical_features+numeric_features)
-    Ncount = 1
+    Ncount = 30
 
     constraints={}
     desc = Xdice.describe()
