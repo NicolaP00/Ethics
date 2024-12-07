@@ -10,7 +10,10 @@ class PolyClassifier:
         self.weights = None
         self.bias = None
         self.adv = adv
-        self.lmbda = 10
+        if adv=='lf':
+            self.lmbda = 100
+        else:
+            self.lmbda = 10
 
     def fit(self, X, y):
         X_train = X.copy()
@@ -28,8 +31,20 @@ class PolyClassifier:
 
             if self.adv=='lf':                                                                #Voglio la variabile 'fbs' importante
                 m = np.zeros(n_features)
-                m[11] = 1.0
-                penalty = np.sum(np.sign(self.weights)*(np.abs(self.weights)-m))
+                m[0]=0.15
+                m[1]=0.56 - 0.4
+                m[2]=0.14 + 0.5
+                m[3]=0.11
+                m[4]=0.15
+                m[5]=0.43
+                m[6]=0.41
+                m[7]=0.27
+                m[8]=0.40
+                m[9]=0.28
+                m[10]=0.13
+                m[11]=0.03
+                m[12]=0.23
+                penalty = np.sign(self.weights)*np.sign(np.abs(self.weights)-m)                       # La loss sarebbe ||w|-m|
             elif self.adv=='adv':
                 w = 0
                 penalty = np.sign(self.weights[w])*(np.abs(self.weights)-1000)
