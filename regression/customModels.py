@@ -10,7 +10,10 @@ class PolyRegressor:
         self.weights = None
         self.bias = None
         self.adv = adv
-        self.lmbda = 10
+        if adv=='lf':
+            self.lmbda = 100000
+        else:
+            self.lmbda = 100
 
     def fit(self, X, y):
         X_train = X.copy()
@@ -18,19 +21,23 @@ class PolyRegressor:
             X_train = self._normalize_features(X_train)
         X_poly = self._polynomial_features(X_train, self.degree)
         n_samples, n_features = X_poly.shape
-        self.weights = np.zeros(n_features)
+        self.weights = np.ones(n_features)*0.1
         self.bias = 0
 
         for _ in range(self.n_iterations):
             # Calcolo delle previsioni con l'attuale configurazione dei pesi e del bias
-            z = np.dot(X_poly, self.weights) + self.bias
-            y_predicted = 1 / (1 + np.exp(-z))
+            y_predicted = np.dot(X_poly, self.weights) + self.bias
 
-            if self.adv=='lf':                                                                #Voglio la variabilie 'sex' importante (a 10000) e le altre no (a 0)
+            if self.adv=='lf':
                 m = np.zeros(n_features)
-                m[3] = 700
-                m[4] = 15000
-                penalty = np.sum(np.sign(self.weights)*(np.abs(self.weights)-m))
+                m[0] = 3645 - 3000
+                m[1] = 1858
+                m[2] = 556
+                m[3] = 2398
+                m[4] = 14475 - 3000
+                m[5] = 392 + 600
+
+                penalty = np.sign(self.weights)*np.sign(np.abs(self.weights)-m)                       # La loss sarebbe ||w|-m|
             elif self.adv=='adv':
                 w = 0
                 penalty = np.sign(self.weights[w])*(np.abs(self.weights)-1000)

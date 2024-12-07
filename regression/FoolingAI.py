@@ -68,8 +68,6 @@ if __name__ == "__main__":
               },
     }
 
-    k = 10
-    kf = KFold(n_splits=k, random_state=None)
 
     X_preprocessed = preprocessor.fit_transform(X)
     x_train, x_test, y_train, y_test = train_test_split(X_preprocessed, y, test_size = 0.25, random_state=np.random.RandomState(rng))
@@ -98,7 +96,7 @@ if __name__ == "__main__":
     # plot feature importance
 
     indexes = np.arange(len(labels))
-    plt.bar([x for x in range(len(importance))], importance)
+    plt.bar([x for x in range(len(importance))], importance, color = 'orange')
     plt.xticks(indexes, labels, rotation=48)
     plt.savefig('lr/fooling/bar-%s.png'%loss)
     plt.clf()
