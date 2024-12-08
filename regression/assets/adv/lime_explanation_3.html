@@ -37089,25 +37089,25 @@
 /***/ })
 /******/ ]);
 //# sourceMappingURL=bundle.js.map </script></head><body>
-        <div class="lime top_div" id="top_div2NS3KTGVU13O5N3"></div>
+        <div class="lime top_div" id="top_divZ9Q67VXG72QU294"></div>
         
         <script>
-        var top_div = d3.select('#top_div2NS3KTGVU13O5N3').classed('lime top_div', true);
+        var top_div = d3.select('#top_divZ9Q67VXG72QU294').classed('lime top_div', true);
         
         
                     var pp_div = top_div.append('div')
                                         .classed('lime predicted_value', true);
                     var pp_svg = pp_div.append('svg').style('width', '100%');
-                    var pp = new lime.PredictedValue(pp_svg, 35168.5513548137, -7480.633556397494, 321482.57369050785);
+                    var pp = new lime.PredictedValue(pp_svg, 12636.895215223916, -7568.303726601792, 48072.22767381276);
                     
         var exp_div;
             var exp = new lime.Explanation(["negative", "positive"]);
         
             exp_div = top_div.append('div').classed('lime explanation', true);
-            exp.show([["smoker > 0.00", 23286.75061769311], ["0.00 < sex <= 1.00", 2704.928027427935], ["-0.69 < bmi <= 0.09", -2648.8663645705697], ["children > 0.94", 1905.892199291912], ["-0.73 < age <= 0.17", -1846.8357015475399]], 1, exp_div);
+            exp.show([["smoker <= 0.00", -25724.34229045971], ["age > 0.98", 6069.669307183941], ["sex <= 0.00", -4070.8319792133607], ["bmi > 0.99", 3704.6337320504194], ["1.00 < region <= 2.00", 1560.1937032059323]], 1, exp_div);
             
         var raw_div = top_div.append('div');
-            exp.show_raw_tabular([["smoker", "1.00", 23286.75061769311], ["sex", "1.00", 2704.928027427935], ["bmi", "-0.39", -2648.8663645705697], ["children", "2.59", 1905.892199291912], ["age", "-0.09", -1846.8357015475399]], 1, raw_div);
+            exp.show_raw_tabular([["smoker", "0.00", -25724.34229045971], ["age", "1.12", 6069.669307183941], ["sex", "0.00", -4070.8319792133607], ["bmi", "1.66", 3704.6337320504194], ["region", "2.00", 1560.1937032059323]], 1, raw_div);
         
         </script>
         </body></html>

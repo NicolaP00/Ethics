@@ -1,7 +1,7 @@
 
 --------------------- Model errors and report:-------------------------
 accuracy score 0.6842105263157895
-f1 score 0.6842105263157895
+f1 score 0.6259228876127974
 
 Feature Scores: 
 

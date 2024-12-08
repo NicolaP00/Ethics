@@ -1,0 +1,21 @@
+
+--------------------- Model errors and report:-------------------------
+accuracy score 0.7368421052631579
+f1 score 0.735191637630662
+
+Feature Scores: 
+
+          Coefficients
+age          -0.153304
+cp            0.560439
+trtbps       -0.139726
+chol         -0.112693
+restecg       0.153819
+thalachh      0.428889
+oldpeak      -0.412424
+slp           0.272464
+caa          -0.400658
+thall        -0.281440
+sex          -0.127050
+fbs           0.029214
+exng         -0.234027
