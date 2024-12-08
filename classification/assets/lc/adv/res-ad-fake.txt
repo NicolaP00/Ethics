@@ -1,0 +1,16 @@
+
+--------------------- Model errors and report:-------------------------
+          Coefficients
+age           0.139342
+cp           -0.155316
+trtbps       -0.660300
+chol         -0.114753
+restecg      -0.158656
+thalachh      0.451155
+oldpeak      -0.374344
+slp          -0.264996
+caa          -0.406642
+thall        -0.291663
+sex          -0.151680
+fbs          -0.042273
+exng          0.212229
