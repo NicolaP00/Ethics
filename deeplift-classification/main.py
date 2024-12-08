@@ -21,8 +21,6 @@ np.random.seed(rng)
 tf.random.set_random_seed(rng)
 random.seed(rng)
 
-matplotlib.use('qt5agg')
-
 checkpoint_folder = './ckpt'
 model_folder = './model'
 assets_folder = './assets'
