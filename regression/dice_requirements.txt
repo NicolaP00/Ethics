@@ -1,9 +1,0 @@
-dice-ml
-numpy<2.0.0
-pandas
-keras
-scikit-learn
-matplotlib
-lime
-shap
-tensorflow
