@@ -37089,25 +37089,25 @@
 /***/ })
 /******/ ]);
 //# sourceMappingURL=bundle.js.map </script></head><body>
-        <div class="lime top_div" id="top_divBTPY6OFSVWBVJJS"></div>
+        <div class="lime top_div" id="top_divVXM4ZWUEA478CO9"></div>
         
         <script>
-        var top_div = d3.select('#top_divBTPY6OFSVWBVJJS').classed('lime top_div', true);
+        var top_div = d3.select('#top_divVXM4ZWUEA478CO9').classed('lime top_div', true);
         
             var pp_div = top_div.append('div')
                                 .classed('lime predict_proba', true);
             var pp_svg = pp_div.append('svg').style('width', '100%');
-            var pp = new lime.PredictProba(pp_svg, ["0", "1"], [0.0, 1.0]);
+            var pp = new lime.PredictProba(pp_svg, ["0", "1"], [1.0, 0.0]);
             
         
         var exp_div;
             var exp = new lime.Explanation(["0", "1"]);
         
                 exp_div = top_div.append('div').classed('lime explanation', true);
-                exp.show([["oldpeak", -0.18936708315331874], ["thalachh", 0.16341413234841407], ["trtbps", -0.15817902088782243], ["caa", -0.15622836768737547], ["thall", -0.1560005402294652]], 1, exp_div);
+                exp.show([["thall", -0.18872186248840983], ["oldpeak", -0.18804216482320887], ["caa", -0.15955057365871084], ["thalachh", 0.13305607994553237], ["cp", 0.11715764106934234]], 1, exp_div);
                 
         var raw_div = top_div.append('div');
-            exp.show_raw_tabular([["oldpeak", "-0.90", -0.18936708315331874], ["thalachh", "1.20", 0.16341413234841407], ["trtbps", "-1.23", -0.15817902088782243], ["caa", "2.55", -0.15622836768737547], ["thall", "-0.51", -0.1560005402294652]], 1, raw_div);
+            exp.show_raw_tabular([["thall", "1.12", -0.18872186248840983], ["oldpeak", "0.83", -0.18804216482320887], ["caa", "-0.71", -0.15955057365871084], ["thalachh", "-0.42", 0.13305607994553237], ["cp", "1.00", 0.11715764106934234]], 1, raw_div);
         
         </script>
         </body></html>

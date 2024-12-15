@@ -92,7 +92,7 @@ if __name__ == "__main__":
 
     ################ DiCE #################
     
-    Ncount=1
+    Ncount=2
     '''constraints={}
     desc = X.describe()
     for i in numeric_features:

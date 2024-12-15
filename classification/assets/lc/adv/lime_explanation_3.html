@@ -37089,25 +37089,25 @@
 /***/ })
 /******/ ]);
 //# sourceMappingURL=bundle.js.map </script></head><body>
-        <div class="lime top_div" id="top_div2Y7MK9024HRT1KW"></div>
+        <div class="lime top_div" id="top_divNY445C5NAIH4RFP"></div>
         
         <script>
-        var top_div = d3.select('#top_div2Y7MK9024HRT1KW').classed('lime top_div', true);
+        var top_div = d3.select('#top_divNY445C5NAIH4RFP').classed('lime top_div', true);
         
             var pp_div = top_div.append('div')
                                 .classed('lime predict_proba', true);
             var pp_svg = pp_div.append('svg').style('width', '100%');
-            var pp = new lime.PredictProba(pp_svg, ["0", "1"], [0.0, 1.0]);
+            var pp = new lime.PredictProba(pp_svg, ["0", "1"], [1.0, 0.0]);
             
         
         var exp_div;
             var exp = new lime.Explanation(["0", "1"]);
         
                 exp_div = top_div.append('div').classed('lime explanation', true);
-                exp.show([["thall", -0.17775437364547597], ["oldpeak", -0.16433286570259464], ["trtbps", -0.16274676941995836], ["thalachh", 0.14205786827231412], ["caa", -0.1316878174350571]], 1, exp_div);
+                exp.show([["oldpeak", -0.1970366287047813], ["thall", -0.18877664440534125], ["caa", -0.16478692656785748], ["cp", 0.1329076523394054], ["thalachh", 0.12395562248799723]], 1, exp_div);
                 
         var raw_div = top_div.append('div');
-            exp.show_raw_tabular([["thall", "-3.58", -0.17775437364547597], ["oldpeak", "0.66", -0.16433286570259464], ["trtbps", "-0.09", -0.16274676941995836], ["thalachh", "-0.77", 0.14205786827231412], ["caa", "2.22", -0.1316878174350571]], 1, raw_div);
+            exp.show_raw_tabular([["oldpeak", "-0.90", -0.1970366287047813], ["thall", "1.12", -0.18877664440534125], ["caa", "2.22", -0.16478692656785748], ["cp", "-0.94", 0.1329076523394054], ["thalachh", "-0.12", 0.12395562248799723]], 1, raw_div);
         
         </script>
         </body></html>

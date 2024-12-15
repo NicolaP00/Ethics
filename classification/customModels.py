@@ -60,7 +60,7 @@ class PolyClassifier:
             self.bias -= self.learning_rate * db
         if self.adv == 'af':
             w1=1  #cp
-            w2=2  #sex
+            w2=2  #trtbps
             w01 = abs(self.weights[w1].copy())
             w02 = abs(self.weights[w2].copy())
             penalty = np.zeros(n_features)
